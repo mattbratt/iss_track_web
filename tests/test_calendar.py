@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from datetime import datetime, timezone
 
-from server.calendar import escape, fold, render_calendar
+from server.calendar import content_disposition, escape, file_name, fold, render_calendar
 
 NOW = datetime(2026, 11, 5, tzinfo=timezone.utc)
 
@@ -72,7 +72,10 @@ def test_calendar_route(client):
     )
     assert response.status_code == 200
     assert response.headers["content-type"].startswith("text/calendar")
-    assert "filename=\"iss-passes.ics\"" in response.headers["content-disposition"]
+    assert response.headers["content-disposition"] == (
+        'inline; filename="ISS passes - Test Town.ics"; filename*=UTF-8\'\'ISS%20passes%20-%20Test%20Town.ics'
+    )
+    assert response.headers["cache-control"] == "public, max-age=1800"
     text = response.text
     assert text.startswith("BEGIN:VCALENDAR\r\n")
     assert text.count("BEGIN:VEVENT") >= 1
@@ -82,3 +85,35 @@ def test_calendar_route(client):
 
     assert client.get("/calendar.ics", params={"latitude": 40, "longitude": -75, "remind": 7}).status_code == 422
     assert client.get("/calendar.ics", params={"latitude": 40, "longitude": -75, "qualities": "huge"}).status_code == 422
+
+
+def test_calendar_download_is_an_attachment_named_after_the_place(client):
+    """download=1 is the desktop route: the browser saves the file and the
+    person opens it in their calendar. Nothing else about the feed changes."""
+    params = {"latitude": 40, "longitude": -75, "name": "Zürich", "remind": 15}
+    feed = client.get("/calendar.ics", params=params)
+    saved = client.get("/calendar.ics", params={**params, "download": 1})
+    assert saved.status_code == 200
+    assert saved.headers["content-type"].startswith("text/calendar")
+    assert saved.headers["content-disposition"] == (
+        'attachment; filename="ISS passes - Zrich.ics"; filename*=UTF-8\'\'ISS%20passes%20-%20Z%C3%BCrich.ics'
+    )
+    assert saved.headers["cache-control"] == "no-store"
+    assert saved.text == feed.text
+
+
+def test_calendar_answers_head(client):
+    """Some calendar clients probe with HEAD before they fetch; a 404 there
+    would read as 'no such feed'."""
+    response = client.head("/calendar.ics", params={"latitude": 40, "longitude": -75})
+    assert response.status_code == 200
+    assert response.headers["content-type"].startswith("text/calendar")
+    assert response.content == b""
+
+
+def test_file_name_and_disposition():
+    assert file_name("") == "ISS passes.ics"
+    assert file_name('  São Paulo / "SP" ') == "ISS passes - São Paulo  SP.ics"
+    assert content_disposition("", download=True) == (
+        'attachment; filename="ISS passes.ics"; filename*=UTF-8\'\'ISS%20passes.ics'
+    )

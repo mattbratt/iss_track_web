@@ -9,6 +9,7 @@ from __future__ import annotations
 
 from datetime import datetime, timezone
 from typing import Any, Iterable
+from urllib.parse import quote
 
 REMIND_CHOICES = (5, 10, 15, 30)
 DEFAULT_REMIND = 10
@@ -50,6 +51,22 @@ def fold(line: str) -> str:
         current += char
     out.append(current)
     return "\r\n".join(out)
+
+
+def file_name(place: str) -> str:
+    """The name a downloaded feed is saved under."""
+    clean = "".join(ch for ch in place if ch not in '\\/:*?"<>|\r\n\t').strip()
+    return f"ISS passes - {clean}.ics" if clean else "ISS passes.ics"
+
+
+def content_disposition(place: str, *, download: bool) -> str:
+    """The Content-Disposition header: inline for a subscription, an attachment
+    with the place in its name for a download. Both spellings of the name go
+    out, the plain ASCII one for old clients and the UTF-8 one (RFC 6266)."""
+    name = file_name(place)
+    ascii_name = name.encode("ascii", "ignore").decode("ascii").replace('"', "")
+    kind = "attachment" if download else "inline"
+    return f'{kind}; filename="{ascii_name}"; filename*=UTF-8\'\'{quote(name)}'
 
 
 def stamp(when: datetime) -> str:

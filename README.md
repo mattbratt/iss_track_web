@@ -13,7 +13,7 @@ See the [changelog](CHANGELOG.md) for what is new in each version.
 - Every pass you can see in the next 10 days from the place you are watching from, with the next matching pass drawn in green on the map and a blue ring showing where the station has to be for you to see it.
 - A note when the station is about to cross your sky with nothing to see, and why: it is in Earth's shadow, or your sky is too bright. That stretch of track is drawn dashed and grey.
 - A sky forecast for each pass, from Open-Meteo's hourly cloud cover at your place.
-- A calendar feed of your matching passes, so your own calendar reminds you before each one.
+- Your matching passes in your own calendar, as a downloaded file or a feed that updates itself, so it reminds you before each one.
 - A guide that explains all of it in plain language.
 - A live video feed from the station when you click its icon (via YouTube).
 
@@ -25,9 +25,14 @@ See the [changelog](CHANGELOG.md) for what is new in each version.
 
 ## Reminders
 
-The bell in the top bar lets your own calendar remind you. It gives you a calendar feed for your place and your pass settings. Subscribe once, with **Open in my calendar** on an iPhone or a Mac, or by copying the address into Google Calendar or Outlook, and every matching pass for the next ten days appears as an event with a reminder 5, 10, 15 or 30 minutes before. Calendars fetch the feed again every few hours, so it keeps itself current.
+The bell in the top bar lets your own calendar remind you, 5, 10, 15 or 30 minutes before each pass that matches your settings. The sheet puts the one-step route for the device on top:
 
-The feed's address carries the place and the settings you had when you made it, so after changing your settings, subscribe again. The sky forecast is written into each event and never drops a pass. Your calendar app or service fetches the address itself, so the site has to be reachable from where that app runs: a phone or Google Calendar needs the public address, not one on your own network.
+- **On a computer**, it downloads a calendar file (`ISS passes - <place>.ics`) holding the next ten days of matching passes. Opening the file imports them all, with their reminders, into Outlook, Apple Calendar, Thunderbird or any other calendar. The file is a snapshot: it does not update itself.
+- **On an iPhone or iPad**, it subscribes Apple Calendar to a feed that keeps itself up to date.
+- **On Android**, it opens Google Calendar's add-a-calendar page for the same feed.
+- **Google Calendar** and **Outlook.com** are one-step subscribe links on every device, through the add-by-address pages both services provide. A Microsoft 365 work account has its own link under "More ways to add it", with the feed address for any other calendar.
+
+The file and the feed carry the place and the settings you had when you made them, so after changing your settings, add it again. The sky forecast is written into each event and never drops a pass. A subscribing calendar fetches the address itself, so for a subscription the site has to be reachable from where that calendar runs: a phone or Google Calendar needs the public address, not one on your own network. The downloaded file has no such need.
 
 ## The guide
 

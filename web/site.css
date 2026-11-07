@@ -21,6 +21,7 @@
   --iss-bg: #141518;
   --iss-bar: #1c1d21;
   --iss-panel: #00549F;
+  --iss-on-panel: #fff;
   --iss-drawer: #2f2f2f;
   --iss-edge: #666;
   --iss-text: #fff;
@@ -84,7 +85,7 @@ a { color: var(--iss-text2); }
   display: flex;
   align-items: baseline;
   gap: 10px;
-  flex: 1;
+  flex: 1 0 auto;
   min-width: 0;
 }
 .brand-name { font-size: 1.15rem; font-weight: 700; letter-spacing: 0.3px; white-space: nowrap; }
@@ -102,8 +103,10 @@ a { color: var(--iss-text2); }
   padding: 6px 10px;
   font-size: 0.9rem;
   max-width: 46vw;
+  flex: 0 1 auto;
+  min-width: 0;
 }
-.chip span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.chip span { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .chip svg, .icon-btn svg, .where-here svg, .where-search svg, .where-row svg {
   width: 18px;
   height: 18px;
@@ -470,6 +473,27 @@ a.icon-btn { text-decoration: none; }
 .remind-lead { font-size: 0.9rem; color: var(--iss-text2); line-height: 1.6; margin: 0; }
 .remind-for { font-size: 0.95rem; margin: 0; }
 .remind-for span { color: var(--iss-text3); }
+.remind-when {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin: 14px 0 16px;
+}
+.remind-when .ps-h { margin: 0; }
+.remind-routes { display: grid; gap: 8px; }
+.remind-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 8px;
+}
+.remind-hint {
+  font-size: 0.8rem;
+  color: var(--iss-text3);
+  line-height: 1.5;
+  text-align: center;
+  margin: 0 0 6px;
+}
 .remind-actions {
   display: flex;
   gap: 10px;
@@ -479,16 +503,47 @@ a.icon-btn { text-decoration: none; }
 .remind-btn {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
-  padding: 9px 14px;
+  padding: 10px 14px;
   font-size: 0.95rem;
   text-decoration: none;
+  color: var(--iss-text);
 }
+.remind-routes .remind-btn { width: 100%; }
 .remind-btn.primary {
-  background: var(--iss-info-bg);
-  color: var(--iss-info);
-  border-color: rgba(133, 183, 235, 0.4);
+  background: var(--iss-panel);
+  color: var(--iss-on-panel);
+  border-color: transparent;
+  font-weight: 700;
+  padding: 13px 16px;
+  font-size: 1rem;
 }
+.remind-btn.primary:hover { filter: brightness(1.1); }
+.remind-more { margin-top: 16px; border-top: 1px solid var(--iss-border); padding-top: 10px; }
+.remind-more summary {
+  cursor: pointer;
+  font-size: 0.9rem;
+  color: var(--iss-text2);
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.remind-more summary::-webkit-details-marker { display: none; }
+.remind-more summary::before {
+  content: '';
+  width: 7px;
+  height: 7px;
+  border-right: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  transform: rotate(-45deg);
+  transition: transform 0.15s;
+}
+.remind-more[open] summary::before { transform: rotate(45deg); }
+.remind-more .remind-actions { margin-top: 10px; }
+.remind-note { font-size: 0.8rem; color: var(--iss-text3); line-height: 1.5; margin: 10px 0 0; }
+.remind-note a { color: var(--iss-info); }
 .remind-btn svg {
   width: 16px;
   height: 16px;
@@ -511,14 +566,6 @@ a.icon-btn { text-decoration: none; }
   text-overflow: ellipsis;
   user-select: all;
 }
-.remind-how {
-  display: grid;
-  grid-template-columns: 90px minmax(0, 1fr);
-  gap: 6px 12px;
-  font-size: 0.85rem;
-  color: var(--iss-text2);
-}
-.remind-how b { color: var(--iss-text); font-weight: 700; }
 .where-here {
   display: flex;
   align-items: center;
@@ -617,6 +664,7 @@ a.icon-btn { text-decoration: none; }
   .ps-head { gap: 6px; }
   #passes #ps-toggle { font-size: 0.95rem; padding: 6px 2px; }
   .chip { max-width: 40vw; }
+  #fullscreen-toggle { display: none; }
 }
 
 /* The elements pill in the strip: fresh reads as the shared "on", stale as a warning. */

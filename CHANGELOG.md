@@ -2,6 +2,14 @@
 
 All notable changes to ISS Track (web) are listed here, newest first.
 
+## 1.2.0 - 2026-11-07
+
+### Changed
+- **Remind me, one step on every device.** On a computer the top button downloads a calendar file named after the place; opening it imports the next ten days of matching passes, reminders included. An iPhone or iPad subscribes Apple Calendar with one tap, and Android opens Google Calendar's add-a-calendar page. Google Calendar and Outlook.com are one-step subscribe links everywhere. The feed address, the webcal link and a Microsoft 365 link sit under a fold.
+
+### Fixed
+- The calendar feed answers a HEAD request; it used to return 404, which a probing calendar client would read as "no such feed".
+
 ## 1.1.0 - 2026-11-06
 
 ### Added

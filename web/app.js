@@ -582,10 +582,30 @@ function closeSettings() {
   $('gear').focus();
 }
 
-// ----- the reminder sheet: a calendar feed for this place and settings ------
+// ----- the reminder sheet: the matching passes into a person's calendar ------
+//
+// The sheet decides by device and puts the one-step route on top. A desktop
+// browser downloads the calendar file, which the person's calendar imports in
+// one go. An iPhone subscribes in Apple Calendar with one tap. Android goes
+// to Google Calendar's add-by-address page. Google Calendar and Outlook.com
+// have that page on every device, so they are one step everywhere. The feed
+// address and the webcal link stay under a fold for people who want them.
 
 const CALENDAR_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>';
+const DOWNLOAD_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M4 19h16"/></svg>';
 const COPY_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg>';
+const LINK_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></svg>';
+
+/* Which kind of device this is, for the order of the buttons. An iPad with a
+ * desktop user agent still reports touch points, which is how it is told from
+ * a Mac. */
+function device() {
+  const ua = navigator.userAgent || '';
+  const touchMac = navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1;
+  if (/iPhone|iPad|iPod/.test(ua) || touchMac) return 'ios';
+  if (/Android/.test(ua)) return 'android';
+  return 'desktop';
+}
 
 function joinWords(words) {
   if (words.length <= 1) return words.join('');
@@ -599,7 +619,7 @@ function settingsSummary() {
   return `${qualities} · magnitude ${S.formatMagnitude(settings.faintest_magnitude)} or brighter · ${when}`;
 }
 
-function feedUrl() {
+function feedUrl(extra = {}) {
   const params = new URLSearchParams({
     latitude: String(observer.latitude),
     longitude: String(observer.longitude),
@@ -610,43 +630,116 @@ function feedUrl() {
     morning: String(settings.morning),
     sky_limit: settings.sky_limit,
     remind: String(remind),
+    ...extra,
   });
   return `${window.location.origin}/calendar.ics?${params}`;
 }
 
+/* Every way into a calendar, each a link. Google and Outlook.com have a page
+ * that takes a feed address and asks to add it; the webcal link is the same
+ * feed for Apple Calendar and desktop Outlook; the download is the feed as a
+ * file, which the person opens and their calendar imports. */
+function calendarRoutes() {
+  const feed = feedUrl();
+  const encoded = encodeURIComponent(feed);
+  const title = encodeURIComponent(`ISS passes, ${placeLabel(observer)}`);
+  return {
+    feed,
+    webcal: feed.replace(/^https?:/, 'webcal:'),
+    download: feedUrl({ download: '1' }),
+    google: `https://calendar.google.com/calendar/render?cid=${encoded}`,
+    outlook: `https://outlook.live.com/calendar/0/addfromweb?url=${encoded}&name=${title}`,
+    office: `https://outlook.office.com/calendar/0/addfromweb?url=${encoded}&name=${title}`,
+  };
+}
+
+function matchingCount() {
+  if (!data) return 0;
+  const now = Date.now();
+  return data.passes.filter((p) => p.matches && Date.parse(p.end) >= now).length;
+}
+
+function passesWord(count) {
+  return count === 1 ? '1 pass' : `${count} passes`;
+}
+
+/* One link styled as a button. `primary` makes it the big one; `blank` opens
+ * it in a new tab, for the Google and Outlook pages; `save` asks the browser
+ * to download rather than show. */
+function routeButton(id, href, icon, label, title, { primary = false, blank = false, save = false } = {}) {
+  const extra = (blank ? ' target="_blank" rel="noopener"' : '') + (save ? ' download' : '');
+  return `<a id="${id}" class="remind-btn${primary ? ' primary' : ''}" href="${S.escapeHtml(href)}"${extra} title="${S.escapeHtml(title)}">${icon}<span>${S.escapeHtml(label)}</span></a>`;
+}
+
+/* The buttons for this device: the one-step route first, then the other two
+ * that work here, and a hint under the first. */
+function routesHtml(routes, kind, count) {
+  const google = routeButton('remind-google', routes.google, LINK_SVG, 'Google Calendar',
+    'GOOGLE CALENDAR: opens Google Calendar, which asks to add this feed. It keeps itself up to date.', { blank: true });
+  const outlook = routeButton('remind-outlook', routes.outlook, LINK_SVG, 'Outlook.com',
+    'OUTLOOK.COM: opens Outlook on the web, which asks to add this feed. It keeps itself up to date.', { blank: true });
+  const fileHint = `Saves a file with the next 10 days. Open it and your calendar adds ${count ? `all ${passesWord(count)}` : 'the passes'}, each with its reminder. The file does not update itself, so come back for more.`;
+  if (kind === 'ios') {
+    return routeButton('remind-apple', routes.webcal, CALENDAR_SVG, 'Add to Apple Calendar',
+      'ADD TO APPLE CALENDAR: one tap, then Subscribe. The calendar keeps itself up to date.', { primary: true })
+      + '<p class="remind-hint">One tap, then Subscribe. Updates itself, reminders included.</p>'
+      + `<div class="remind-grid">${google}${routeButton('remind-file', routes.download, DOWNLOAD_SVG, 'Calendar file',
+        `CALENDAR FILE: ${fileHint}`)}</div>`;
+  }
+  if (kind === 'android') {
+    return routeButton('remind-google', routes.google, LINK_SVG, 'Add to Google Calendar',
+      'ADD TO GOOGLE CALENDAR: opens Google Calendar, which asks to add this feed. It keeps itself up to date.', { primary: true, blank: true })
+      + '<p class="remind-hint">Google asks once, then keeps the passes up to date.</p>'
+      + `<div class="remind-grid">${routeButton('remind-file', routes.download, DOWNLOAD_SVG, 'Calendar file',
+        `CALENDAR FILE: ${fileHint}`, { save: true })}${outlook}</div>`;
+  }
+  return routeButton('remind-file', routes.download, DOWNLOAD_SVG, 'Download calendar file',
+    `DOWNLOAD CALENDAR FILE: ${fileHint}`, { primary: true, save: true })
+    + `<p class="remind-hint">${S.escapeHtml(fileHint)}</p>`
+    + `<div class="remind-grid">${google}${outlook}</div>`
+    + '<p class="remind-hint">Those two subscribe in one step and keep themselves up to date.</p>';
+}
+
+/* The fold: the feed itself, for calendars that take an address. */
+function moreHtml(routes, kind) {
+  const webcal = kind === 'android' ? '' : routeButton('remind-webcal', routes.webcal, CALENDAR_SVG,
+    kind === 'ios' ? 'Subscribe again' : 'Subscribe in my calendar app',
+    'SUBSCRIBE: hands the feed to Apple Calendar or Outlook on this computer, which asks to subscribe.');
+  const office = `<a href="${S.escapeHtml(routes.office)}" target="_blank" rel="noopener" title="MICROSOFT 365: for a work or school Outlook account.">Microsoft 365 work account</a>`;
+  return '<details class="remind-more">'
+    + '<summary title="MORE WAYS: the feed address, for any calendar that subscribes by address.">More ways to add it</summary>'
+    + '<p class="remind-note">This is a calendar feed. Any calendar that subscribes by address can use it, and it refreshes itself every few hours.</p>'
+    + `<div class="remind-actions">${webcal}`
+    + `<button id="remind-copy" class="remind-btn" title="COPY ADDRESS: for any calendar that asks for a URL.">${COPY_SVG}<span>Copy address</span></button>`
+    + '<span id="remind-copied"></span></div>'
+    + `<div class="remind-addr" id="remind-addr" title="FEED ADDRESS: paste this where your calendar asks for a URL.">${S.escapeHtml(routes.feed)}</div>`
+    + `<p class="remind-note">${office}. The address holds this place and these settings; after changing them, add it again. The forecast in each event is the one from when your calendar last fetched the feed, and a pass is never dropped for weather.</p>`
+    + '</details>';
+}
+
 function remindHtml() {
   const head = '<div class="ps-sheet-head"><h2 id="remind-title">Remind me</h2>'
-    + S.pill('neutral', 'Place and settings baked in', 'BAKED IN: the feed address carries this place and these settings. Change them later and subscribe again.')
     + '<button id="remind-close" class="ps-icon" aria-label="Close" title="CLOSE">×</button></div>';
   if (!observer) {
     return head
       + '<p class="remind-lead">Your calendar can remind you before every pass that matches your settings. Choose where you are watching from first.</p>'
       + '<p style="margin:14px 0 0"><button id="remind-choose" class="ps-action" title="WATCHING FROM: choose a place.">Choose a place</button></p>';
   }
-  const url = feedUrl();
-  const webcal = url.replace(/^https?:/, 'webcal:');
+  const routes = calendarRoutes();
+  const kind = device();
+  const count = matchingCount();
   const choices = REMIND_CHOICES.map((minutes) => (
-    `<button data-remind="${minutes}" class="${minutes === remind ? 'on' : ''}">${minutes} min</button>`
+    `<button data-remind="${minutes}" class="${minutes === remind ? 'on' : ''}">${minutes}</button>`
   )).join('');
   return head
-    + '<p class="remind-lead">Your calendar does the reminding. Subscribe once, and every pass that matches your settings appears as an event for the next 10 days, kept up to date by itself.</p>'
-    + '<p class="ps-h">For</p>'
+    + `<p class="remind-lead">Add the next 10 days of passes that match your settings to your calendar. Each one carries its own reminder.</p>`
     + `<p class="remind-for">${S.escapeHtml(placeLabel(observer))} <span>· ${S.escapeHtml(settingsSummary())}</span></p>`
-    + '<p class="ps-h">Remind me</p>'
-    + `<div class="ps-seg" id="remind-lead" title="LEAD TIME: how long before the pass starts the reminder goes off.">${choices}<button disabled style="color:var(--iss-text3)">before</button></div>`
-    + '<p class="ps-h">Subscribe</p>'
-    + '<div class="remind-actions">'
-    + `<a id="remind-open" class="remind-btn primary" href="${S.escapeHtml(webcal)}" title="OPEN IN MY CALENDAR: hands the feed to your calendar app, which asks to subscribe.">${CALENDAR_SVG}Open in my calendar</a>`
-    + `<button id="remind-copy" class="remind-btn" title="COPY ADDRESS: for Google Calendar and Outlook on the web.">${COPY_SVG}Copy address</button>`
-    + '<span id="remind-copied"></span></div>'
-    + `<div class="remind-addr" id="remind-addr" title="FEED ADDRESS: paste this where your calendar asks for a URL.">${S.escapeHtml(url)}</div>`
-    + '<p class="ps-h">How to add it</p>'
-    + '<div class="remind-how">'
-    + '<b>iPhone, Mac</b><span>Open in my calendar, then Subscribe. Reminders arrive like any other event.</span>'
-    + '<b>Google</b><span>Copy the address. In Google Calendar on the web: Other calendars, +, From URL, paste. Google refreshes feeds slowly, sometimes once a day.</span>'
-    + '<b>Outlook</b><span>Copy the address. Add calendar, Subscribe from web, paste.</span>'
-    + '</div>'
-    + '<p class="ps-note" style="margin:14px 0 0">The address holds this place and these settings. If you change your pass settings later, subscribe again. The forecast in each event is the one at the time your calendar last fetched the feed, and a pass is never dropped for weather.</p>';
+    + '<div class="remind-when">'
+    + '<span class="ps-h">Remind me</span>'
+    + `<div class="ps-seg" id="remind-lead" title="LEAD TIME: how long before the pass starts the reminder goes off.">${choices}</div>`
+    + '<span class="ps-h">min before</span></div>'
+    + `<div class="remind-routes">${routesHtml(routes, kind, count)}</div>`
+    + moreHtml(routes, kind);
 }
 
 async function copyFeed() {
@@ -669,6 +762,7 @@ async function copyFeed() {
 }
 
 function buildRemind() {
+  const wasOpen = $('remind-sheet').querySelector('details')?.open || false;
   $('remind-sheet').innerHTML = remindHtml();
   $('remind-close').addEventListener('click', closeRemind);
   if (!observer) {
@@ -683,6 +777,7 @@ function buildRemind() {
     buildRemind();
   });
   $('remind-copy').addEventListener('click', copyFeed);
+  if (wasOpen) $('remind-sheet').querySelector('details').open = true;
 }
 
 function openRemind() {

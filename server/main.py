@@ -17,7 +17,7 @@ from fastapi import FastAPI, HTTPException, Query, Request
 from fastapi.responses import JSONResponse, Response
 from fastapi.staticfiles import StaticFiles
 
-from .calendar import DEFAULT_REMIND, REMIND_CHOICES, render_calendar
+from .calendar import DEFAULT_REMIND, REMIND_CHOICES, content_disposition, render_calendar
 from .hub import (
     MAGNITUDE_BRIGHTEST,
     MAGNITUDE_FAINTEST,
@@ -162,7 +162,7 @@ def site_url(request: Request) -> str:
     return f"{scheme}://{host}/"
 
 
-@app.get("/calendar.ics")
+@app.api_route("/calendar.ics", methods=["GET", "HEAD"])
 async def calendar(
     request: Request,
     latitude: float = Query(ge=-90, le=90),
@@ -174,8 +174,12 @@ async def calendar(
     morning: bool | None = None,
     sky_limit: str | None = Query(default=None, max_length=20),
     remind: int = DEFAULT_REMIND,
+    download: bool = False,
 ):
-    """Matching passes as a calendar feed. The place and settings are in the address."""
+    """Matching passes as a calendar feed. The place and settings are in the address.
+    With download=1 the reply is an attachment named after the place, so a browser
+    saves it and the person opens it in their calendar; without it, a subscription
+    feed. HEAD is answered too: some calendar clients probe before they fetch."""
     limited(request)
     if remind not in REMIND_CHOICES:
         return error(422, "bad_settings", "Remind me 5, 10, 15 or 30 minutes before a pass")
@@ -185,9 +189,10 @@ async def calendar(
         return error(422, "bad_settings", str(err))
     hub: Hub = request.app.state.hub
     result = await hub.passes(engine.Observer(latitude, longitude, 0.0), settings)
+    place = " ".join((name or "").split())
     text = render_calendar(
         result["passes"],
-        place=" ".join((name or "").split()),
+        place=place,
         latitude=latitude,
         longitude=longitude,
         remind=remind,
@@ -198,8 +203,8 @@ async def calendar(
         content=text,
         media_type="text/calendar; charset=utf-8",
         headers={
-            "Content-Disposition": 'inline; filename="iss-passes.ics"',
-            "Cache-Control": "public, max-age=1800",
+            "Content-Disposition": content_disposition(place, download=download),
+            "Cache-Control": "no-store" if download else "public, max-age=1800",
         },
     )
 
