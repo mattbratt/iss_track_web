@@ -1,0 +1,28 @@
+name: Tests
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  service:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout, with the engine submodule
+        uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install requirements
+        run: pip install -r requirements.txt pytest
+
+      - name: Run the service tests
+        run: pytest tests -q
+
+      - name: Run the engine's own tests at the pinned version
+        run: pytest vendor/iss_track/tests -q

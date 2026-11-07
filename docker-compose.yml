@@ -1,0 +1,28 @@
+# ISS Track (web) behind a Cloudflare Tunnel. Copy this file and .env.example
+# (renamed to .env, with your tunnel token) into one folder, then
+# "docker compose up -d", or create a Container Manager project from the
+# folder on a Synology NAS.
+services:
+  iss_track_web:
+    image: ghcr.io/mattbratt/iss_track_web:latest
+    container_name: iss_track_web
+    restart: unless-stopped
+    environment:
+      # Behind the tunnel, request limits apply per visitor, not per tunnel.
+      ISS_TRACK_TRUST_PROXY: "1"
+    volumes:
+      # The last good orbital elements, kept across restarts.
+      - ./data:/data
+    ports:
+      # Reachable on your own network as well, at http://<host>:8765
+      - "8765:8000"
+
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: iss_track_tunnel
+    restart: unless-stopped
+    command: tunnel --no-autoupdate run
+    environment:
+      TUNNEL_TOKEN: ${CLOUDFLARE_TUNNEL_TOKEN}
+    depends_on:
+      - iss_track_web

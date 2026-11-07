@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ISS Track</title>
+  <meta name="description" content="The International Space Station on a live map, and the passes you can see from where you are." />
+  <link rel="icon" href="/vendor/images/iss_tiny.png" />
+  <link rel="preload" href="/vendor/images/mapday.jpg" as="image">
+  <link rel="preload" href="/vendor/images/mapnight.jpg" as="image">
+  <link rel="preload" href="/vendor/images/iss_tiny.png" as="image">
+  <link rel="stylesheet" href="/site.css" />
+  <script src="/vendor/astronomy.browser.js" defer></script>
+  <script type="module" src="/app.js"></script>
+</head>
+<body>
+<header class="top">
+  <div class="brand">
+    <span class="brand-name">ISS Track</span>
+    <span class="brand-tag">live map and the passes you can see</span>
+  </div>
+  <button id="where-chip" class="chip" title="WATCHING FROM: change the place passes are predicted for.">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-6-5.3-6-11a6 6 0 0 1 12 0c0 5.7-6 11-6 11z"/><circle cx="12" cy="10" r="2.5"/></svg>
+    <span id="where-name">Choose a place</span>
+    <svg viewBox="0 0 24 24" aria-hidden="true" class="chev"><path d="M6 9l6 6 6-6"/></svg>
+  </button>
+  <button id="gear" class="icon-btn" aria-label="Pass settings" title="PASS SETTINGS: choose which passes count. Saved in this browser.">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
+  </button>
+  <button id="units" class="icon-btn units" title="UNITS: switch between miles and kilometres.">mi</button>
+  <button id="fullscreen-toggle" class="icon-btn" aria-label="Full screen" title="FULL SCREEN: show the map on its own.">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>
+  </button>
+</header>
+
+<main id="tracker-container">
+  <canvas id="earthCanvas" aria-label="World map with the station's position and tracks"></canvas>
+  <div id="iss-tooltip" class="tooltip">Click to watch live video from the station</div>
+  <div id="info-panel">
+    <div id="primary-data">
+      <div class="data-section">
+        <div class="data-label" data-full="Latitude" data-abbr="Lat">Latitude</div>
+        <div id="lat" class="data-value">--</div>
+      </div>
+      <div class="data-section">
+        <div class="data-label" data-full="Longitude" data-abbr="Lon">Longitude</div>
+        <div id="lon" class="data-value">--</div>
+      </div>
+      <div class="data-section">
+        <div class="data-label" data-full="Altitude" data-abbr="Alt">Altitude</div>
+        <div id="alt" class="data-value">--</div>
+      </div>
+      <div class="data-section">
+        <div class="data-label" data-full="Speed" data-abbr="Spd">Speed</div>
+        <div id="speed" class="data-value">--</div>
+      </div>
+      <div class="data-section">
+        <div class="data-label" data-full="ISS time" data-abbr="Time">ISS time</div>
+        <div id="time" class="data-value">--</div>
+      </div>
+      <div class="data-section" id="tle-section">
+        <span id="tle-pill" class="iss-pill neutral" hidden></span>
+      </div>
+    </div>
+    <div id="tle-info"></div>
+  </div>
+
+  <section id="passes" hidden>
+    <div class="ps-head">
+      <button id="ps-toggle" aria-expanded="true" title="VISIBLE PASSES: show or hide the list of passes you can see.">Visible passes <span id="ps-chevron" aria-hidden="true">▾</span></button>
+      <span id="ps-summary" class="ps-summary"></span>
+      <span id="ps-note" class="ps-note"></span>
+    </div>
+    <div id="ps-body">
+      <div id="ps-unseen" hidden></div>
+      <div id="ps-hero" class="plain"></div>
+      <p id="ps-count" class="ps-note"></p>
+      <div id="ps-list"></div>
+    </div>
+  </section>
+</main>
+
+<footer class="foot">
+  <p>Your location is rounded to about a kilometre before it leaves this browser, is used only to predict passes and fetch the sky forecast, and is not stored on the server. Places and settings are remembered in this browser only.</p>
+  <p>Map styling inspired by the <a href="https://isstracker.spaceflight.esa.int/" rel="noopener">ESA ISS Tracker</a> · orbits by <a href="https://github.com/brandon-rhodes/python-sgp4" rel="noopener">sgp4</a> · orbital elements from <a href="https://celestrak.org/" rel="noopener">Celestrak</a> · Moon by <a href="https://github.com/cosinekitty/astronomy" rel="noopener">astronomy.browser.js</a> · places and sky forecast by <a href="https://open-meteo.com/" rel="noopener">Open-Meteo</a> · also a <a href="https://github.com/mattbratt/iss_track" rel="noopener">Home Assistant integration</a> · <a href="https://github.com/mattbratt/iss_track_web" rel="noopener">source</a></p>
+</footer>
+
+<div id="waitmsg">Loading ISS Track…</div>
+
+<div id="videoModal" class="modal">
+  <div class="modal-content">
+    <span class="close" role="button" aria-label="Close">×</span>
+    <iframe
+      src="https://www.youtube.com/embed/awQzjn72bI0?si=NuMb4gYmPAp0D0kP"
+      title="YouTube video player"
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+      referrerpolicy="strict-origin-when-cross-origin"
+      allowfullscreen>
+    </iframe>
+  </div>
+</div>
+
+<div id="whereModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="where-title">
+  <div class="ps-sheet where-sheet">
+    <div class="ps-sheet-head">
+      <h2 id="where-title">Where are you watching from?</h2>
+      <button id="where-close" class="ps-icon" aria-label="Close" title="CLOSE">×</button>
+    </div>
+    <button id="where-here" class="where-here" title="USE MY LOCATION: asks this browser for its position once.">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>
+      <span>Use my location</span>
+      <span class="where-hint">rounded to about 1 km</span>
+    </button>
+    <p id="where-status" class="ps-note">Your position is rounded to about a kilometre before it leaves this browser, and nothing is stored on the server.</p>
+    <p class="ps-h">Or a place</p>
+    <div class="where-search">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+      <input id="where-input" type="search" placeholder="Search a town or city" autocomplete="off" aria-label="Search a town or city" title="PLACE SEARCH: type a town or city name." />
+    </div>
+    <div id="where-results" class="where-list"></div>
+    <p class="ps-h" id="where-recent-title" hidden>Recent</p>
+    <div id="where-recent" class="where-list"></div>
+    <p class="ps-note where-foot">Places are remembered in this browser only. Pass times are shown in the place's own time zone.</p>
+  </div>
+</div>
+
+<div id="settingsModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="ps-sheet-title">
+  <div class="ps-sheet" id="ps-sheet"></div>
+</div>
+</body>
+</html>
