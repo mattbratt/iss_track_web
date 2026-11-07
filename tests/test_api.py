@@ -91,3 +91,10 @@ def test_page_and_vendor_assets_are_served_with_headers(client):
     assert client.get("/vendor/images/mapday.jpg").status_code == 200
     assert client.get("/map.js").status_code == 200
     assert client.get("/nothing-here").status_code == 404
+
+    guide = client.get("/guide/")
+    assert guide.status_code == 200
+    assert "<title>ISS Track guide</title>" in guide.text
+    assert 'href="#why"' in guide.text
+    assert client.get("/guide", follow_redirects=False).status_code in (301, 307, 308)
+    assert client.get("/guide.css").status_code == 200

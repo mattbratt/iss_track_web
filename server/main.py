@@ -8,14 +8,16 @@ from __future__ import annotations
 
 import logging
 import os
+from datetime import datetime, timezone
 from contextlib import asynccontextmanager
 from pathlib import Path
 
 import httpx
 from fastapi import FastAPI, HTTPException, Query, Request
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, Response
 from fastapi.staticfiles import StaticFiles
 
+from .calendar import DEFAULT_REMIND, REMIND_CHOICES, render_calendar
 from .hub import (
     MAGNITUDE_BRIGHTEST,
     MAGNITUDE_FAINTEST,
@@ -150,6 +152,56 @@ async def passes(
     hub: Hub = request.app.state.hub
     observer = engine.Observer(latitude, longitude, 0.0)
     return await hub.passes(observer, settings)
+
+
+def site_url(request: Request) -> str:
+    """The address visitors use for this site, for the calendar's links.
+    Behind the tunnel the service sees plain HTTP, so trust_proxy says https."""
+    host = request.headers.get("host") or request.url.netloc
+    scheme = "https" if request.app.state.trust_proxy else request.url.scheme
+    return f"{scheme}://{host}/"
+
+
+@app.get("/calendar.ics")
+async def calendar(
+    request: Request,
+    latitude: float = Query(ge=-90, le=90),
+    longitude: float = Query(ge=-180, le=180),
+    name: str | None = Query(default=None, max_length=80),
+    qualities: str | None = Query(default=None, max_length=60),
+    faintest_magnitude: float | None = Query(default=None, ge=MAGNITUDE_BRIGHTEST, le=MAGNITUDE_FAINTEST),
+    evening: bool | None = None,
+    morning: bool | None = None,
+    sky_limit: str | None = Query(default=None, max_length=20),
+    remind: int = DEFAULT_REMIND,
+):
+    """Matching passes as a calendar feed. The place and settings are in the address."""
+    limited(request)
+    if remind not in REMIND_CHOICES:
+        return error(422, "bad_settings", "Remind me 5, 10, 15 or 30 minutes before a pass")
+    try:
+        settings = parse_settings(qualities, faintest_magnitude, evening, morning, sky_limit)
+    except ValueError as err:
+        return error(422, "bad_settings", str(err))
+    hub: Hub = request.app.state.hub
+    result = await hub.passes(engine.Observer(latitude, longitude, 0.0), settings)
+    text = render_calendar(
+        result["passes"],
+        place=" ".join((name or "").split()),
+        latitude=latitude,
+        longitude=longitude,
+        remind=remind,
+        now=datetime.fromtimestamp(result["now"] / 1000, timezone.utc),
+        site=site_url(request),
+    )
+    return Response(
+        content=text,
+        media_type="text/calendar; charset=utf-8",
+        headers={
+            "Content-Disposition": 'inline; filename="iss-passes.ics"',
+            "Cache-Control": "public, max-age=1800",
+        },
+    )
 
 
 @app.get("/api/places")

@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ISS Track guide</title>
+  <meta name="description" content="How to see the International Space Station: what the map shows, why passes happen at dusk and dawn, how to read a pass, and what to do outside." />
+  <link rel="icon" href="/vendor/images/iss_tiny.png" />
+  <link rel="stylesheet" href="/site.css" />
+  <link rel="stylesheet" href="/guide.css" />
+</head>
+<body>
+<header class="top">
+  <div class="brand">
+    <span class="brand-name">ISS Track</span>
+    <span class="brand-tag">guide</span>
+  </div>
+  <a href="/" class="chip" title="BACK TO THE MAP: the live map and your passes.">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5M11 18l-6-6 6-6"/></svg>
+    <span>Back to the map</span>
+  </a>
+</header>
+
+<div class="guide-wrap">
+  <nav class="guide-toc" aria-label="Chapters">
+    <a href="#looking">What you are looking at</a>
+    <a href="#why">Why you can see it at all</a>
+    <a href="#orbits">Orbits, gently</a>
+    <a href="#reading">Reading a pass</a>
+    <a href="#unseen">When there is nothing to see</a>
+    <a href="#settings">Pass settings</a>
+    <a href="#where">Where you are watching from</a>
+    <a href="#reminders">Reminders</a>
+    <a href="#outside">Going outside</a>
+    <a href="#trust">How far to trust it</a>
+    <a href="#credits">Credits</a>
+  </nav>
+
+  <article class="guide">
+    <h1>How to see the Space Station</h1>
+    <p class="guide-sub">Five minutes to read, no maths. Everything on the map and in the passes list, explained.</p>
+
+    <p>The International Space Station is the biggest thing people have ever put in space, about the size of a football field, and it crosses the sky above almost everyone on Earth several times a day. Most of those crossings are invisible. This guide explains which ones you can see, how the map and the passes list tell you, and what to do when you step outside.</p>
+
+    <h2 id="looking">What you are looking at</h2>
+    <p>The map is the whole Earth laid flat. The station is the small picture of the station itself, and the circle around it is the patch of ground from which it is above the horizon right now. The darker part of the map is night, and the line between light and dark moves as the Earth turns.</p>
+    <ul>
+      <li><span class="swatch sw-white"></span>The white line is where the station has been over the last hour and a half.</li>
+      <li><span class="swatch sw-yellow"></span>The yellow line is where it is going over the next hour and a half.</li>
+      <li><span class="swatch sw-blue"></span>The blue ring is drawn around the place you are watching from. For you to see the station, it has to be somewhere inside that ring.</li>
+      <li><span class="swatch sw-green"></span>The green stretch is the next pass you can see from your place, if there is one coming that matches your settings.</li>
+      <li><span class="swatch sw-grey dashed"></span>A dashed grey stretch is the station crossing your sky with nothing to see. The next chapter explains why that happens.</li>
+    </ul>
+    <p>Under the map are the station's position, its height, its speed, and the time at the station, which is always kept on Greenwich time. The pill on the right says how old the orbital data is. Click the station on the map to watch the live video from on board.</p>
+
+    <h2 id="why">Why you can see it at all</h2>
+    <p>The station has no lights you could see from the ground. What you see is sunlight bouncing off its solar panels, the same way the Moon shines. So two things have to be true at once: your sky must be dark, and the station, 400 km above you, must still be in the Sun. That only happens for an hour or two after dusk and before dawn, when you are already in the Earth's shadow but something high above you is not.</p>
+    <figure>
+      <svg viewBox="0 0 560 190" role="img" aria-label="Diagram: the Sun on the left, the Earth in the middle with its shadow stretching right, an observer on the night side, and the station passing above them still lit by the Sun, then entering the shadow">
+        <circle cx="40" cy="95" r="22" fill="#f5c84a"/>
+        <g stroke="#f5c84a" stroke-opacity=".45" stroke-width="1"><line x1="66" y1="60" x2="540" y2="60"/><line x1="66" y1="130" x2="540" y2="130"/></g>
+        <path d="M300 55 L560 55 L560 135 L300 135 Z" fill="#0a1226"/>
+        <circle cx="300" cy="95" r="40" fill="#1b2a4a" stroke="rgba(255,255,255,.3)"/>
+        <path d="M300 55 A40 40 0 0 1 300 135 Z" fill="#0a1226"/>
+        <ellipse cx="300" cy="95" rx="62" ry="62" fill="none" stroke="#f5d020" stroke-width="1.5" stroke-dasharray="4 4"/>
+        <circle cx="336" cy="44" r="5" fill="#fff"/>
+        <text x="346" y="40" fill="#fff" font-size="12" font-family="Roboto Condensed, Arial, sans-serif">station, still in sunlight</text>
+        <circle cx="361" cy="100" r="5" fill="#5f6370"/>
+        <text x="371" y="104" fill="rgba(255,255,255,.6)" font-size="12" font-family="Roboto Condensed, Arial, sans-serif">station in Earth's shadow</text>
+        <circle cx="338" cy="92" r="3" fill="#85b7eb"/>
+        <line x1="338" y1="92" x2="336" y2="49" stroke="#85b7eb" stroke-width="1" stroke-dasharray="3 3"/>
+        <text x="258" y="170" fill="#85b7eb" font-size="12" font-family="Roboto Condensed, Arial, sans-serif">you, on the night side, in the dark</text>
+        <text x="40" y="150" fill="#f5c84a" font-size="12" text-anchor="middle" font-family="Roboto Condensed, Arial, sans-serif">Sun</text>
+        <text x="470" y="100" fill="rgba(255,255,255,.45)" font-size="12" font-family="Roboto Condensed, Arial, sans-serif">Earth's shadow</text>
+      </svg>
+      <figcaption>Just after sunset you are in the dark, but the station, far above you, is still in the sunlight. A little later on its path it flies into the Earth's shadow and goes dark too.</figcaption>
+    </figure>
+    <div class="aside">
+      <p><b>Why a pass can vanish mid-sky.</b> When the station flies into the Earth's shadow it switches off like a lamp, often while still high above you. The passes list calls that "fades into Earth's shadow". Before dawn it is the other way round: the station appears out of the shadow already high up, which the list calls "appears out of Earth's shadow".</p>
+      <p><b>Why there are no passes in the middle of the night.</b> By then the station's whole path over you is inside the shadow. And in the middle of the day it is in the Sun, but so is your sky, and the station is lost in the blue.</p>
+    </div>
+
+    <h2 id="orbits">Orbits, gently</h2>
+    <p>The station is about 400 km up, which is closer than many people think: roughly the distance from London to Paris, straight up. It moves at about 28,000 km an hour, fast enough to go all the way round the Earth in 93 minutes. The crew sees sixteen sunrises a day.</p>
+    <p>Three things about that orbit explain almost everything you will notice on the map and in the list.</p>
+    <h3>Why the track is a wave</h3>
+    <p>The station circles the Earth on a tilted ring, leaning 51.6 degrees from the equator. A tilted ring drawn on a flat map comes out as a wave, swinging as far north as southern Canada and as far south as the tip of South America. That tilt is why the station never flies over the poles, and why people in the far north and far south see it low in the sky or not at all.</p>
+    <h3>Why each lap lands further west</h3>
+    <p>The ring stays put in space while the Earth turns underneath it. In the 93 minutes one lap takes, the Earth has turned about 23 degrees eastward, so the next lap crosses the ground about 2,300 km further west. That is why the yellow line ahead does not join up with the white line behind, and why the station comes back over your area at a different time every day.</p>
+    <h3>Why passes come in runs</h3>
+    <p>For you to see a pass, the station's path, your dusk or dawn, and the edge of the Earth's shadow all have to line up. That alignment drifts slowly, so visible passes come in runs: a week or two of evening passes, then nothing, then a week or two of morning passes. If the list says "no matching passes for 10 days", that is usually all it means. Wait a week and look again.</p>
+
+    <h2 id="reading">Reading a pass</h2>
+    <p>A pass is one crossing of your sky, from the moment you can first see the station to the moment you lose it. The list gives each one a day and a time, a quality, how high it gets, how bright it will be, and where it comes from and goes to.</p>
+    <h3>How high</h3>
+    <p>Height in the sky is measured in degrees above the horizon: 0 is on the horizon, 90 is straight overhead. A fist held at arm's length covers about 10 degrees, so a pass that peaks at 50 degrees reaches five fists up. Anything under 10 degrees is hidden behind houses and trees for most people, which is why the list only counts passes that get above that.</p>
+    <h3>Quality</h3>
+    <p>The quality is a plain-words version of how high the pass gets. Higher is better: the station is closer, brighter, and above the murk near the horizon.</p>
+    <table>
+      <tr><th>Quality</th><th>Highest point</th><th>What it is like</th></tr>
+      <tr><td>Excellent</td><td>61 to 90 degrees</td><td>High, bright, hard to miss. Worth telling the neighbours.</td></tr>
+      <tr><td>Good</td><td>41 to 60 degrees</td><td>Strong and reliable. The right first pass for someone who has never seen it.</td></tr>
+      <tr><td>Fair</td><td>21 to 40 degrees</td><td>Visible if you know where to look and have a clear view that way.</td></tr>
+      <tr><td>Poor</td><td>10 to 20 degrees</td><td>Low, often behind something, and dimmed by haze. Easy to miss.</td></tr>
+    </table>
+    <h3>Brightness</h3>
+    <p>Astronomers measure brightness on a scale called magnitude that runs backwards: the lower the number, the brighter the object. The brightest star in the night sky is about magnitude minus 1.5. Venus, the brightest planet, is about minus 4. A good station pass sits between the two, around minus 3, which makes it brighter than any star. The number shown is for the highest point of the pass, and it is an estimate.</p>
+    <h3>Directions</h3>
+    <p>"Rises in the WSW, sets in the NE" tells you where to face at the start and where the station will be going. The directions are compass points: N, NE, E and so on, with the in-between ones like WSW meaning west-southwest. The small arc beside the next pass shows the same thing as a picture, with the horizon along the bottom.</p>
+    <h3>Start and end</h3>
+    <p>A pass starts either when the station comes up over your horizon or, before dawn, when it comes out of the Earth's shadow already high up. It ends when it sets or when it fades into the shadow. The list tells you which, and the time shown is the moment you can first see it, not the moment it comes over the horizon.</p>
+
+    <h2 id="unseen">When there is nothing to see</h2>
+    <p>Sometimes a note above the next pass says the station is overhead right now, or will be shortly, but there is nothing to see. That is an honest answer to the question "where is it", and it is not a pass. There are two reasons it can happen.</p>
+    <ul>
+      <li><b>In Earth's shadow.</b> The station is above you, but it is dark too. This is every crossing in the middle of the night.</li>
+      <li><b>Your sky is too bright.</b> The station is lit, but so is your sky, and it cannot be picked out. This is every crossing in daylight.</li>
+    </ul>
+    <p>The matching stretch of track is drawn dashed and grey on the map rather than green. No reminder is ever made for one of these.</p>
+
+    <h2 id="settings">Pass settings</h2>
+    <p>The gear opens the pass settings. They decide which passes count as yours: the ones marked "Matches" in the list, the one shown as your next pass, the green track on the map, and the passes in your calendar if you subscribe. Settings are kept in this browser and nowhere else.</p>
+    <dl>
+      <dt>Pass quality to include</dt>
+      <dd>Tick the qualities you want. Starting out, Good and Excellent is a sensible choice: every pass you are told about will be an easy one.</dd>
+      <dt>Minimum brightness</dt>
+      <dd>Leaves out passes fainter than this. Magnitude minus 2 or brighter is easy from the suburbs. Slide towards "dimmer" if you have dark skies, towards "brighter" if you live under city lights.</dd>
+      <dt>Time of day</dt>
+      <dd>Evening passes happen in the hour or two after sunset. Morning passes happen in the hour or two before sunrise, and about half of all visible passes are morning ones. Most people start with evenings only.</dd>
+      <dt>Sky forecast</dt>
+      <dd>Each pass gets the cloud forecast for its time at your place, from Open-Meteo. A pass under a forecast worse than your limit is marked "Clouds likely" rather than "Matches". The forecast never removes a pass: a ten-day forecast is a guess, and skies clear.</dd>
+    </dl>
+
+    <h2 id="where">Where you are watching from</h2>
+    <p>Passes depend on where you stand. A pass that is excellent in one town can be poor 300 km away, so the first thing the site asks is where you are watching from.</p>
+    <ul>
+      <li><b>Use my location</b> asks your browser for its position once. The position is rounded to about a kilometre before it leaves your browser, which is more than precise enough for passes, and it is not stored on the server. Browsers only share a location over a secure connection, so this needs an address starting with https.</li>
+      <li><b>A place</b> finds a town or city by name. Pass times are shown in that place's own time zone, which is named under the "Visible passes" title, so you can look up passes for somewhere you are travelling to.</li>
+    </ul>
+    <p>Up to five recent places are remembered in your browser, along with your settings. Nothing is remembered anywhere else.</p>
+
+    <h2 id="reminders">Reminders</h2>
+    <p>The bell lets your own calendar remind you. It gives you a calendar feed for your place and your settings. Subscribe once, and every pass that matches appears in your calendar as an event for the next ten days, with a reminder five to thirty minutes before, whichever you chose. Your calendar fetches the feed again every few hours, so the list keeps itself current.</p>
+    <p>The feed's address holds the place and the settings you had when you made it. If you change your settings later, open the bell again and subscribe again. The weather forecast written into each event is the one from when your calendar last fetched the feed.</p>
+
+    <h2 id="outside">Going outside</h2>
+    <ul>
+      <li>Be outside two minutes before the start time, facing the start direction, with a clear view that way.</li>
+      <li>The station looks like a bright, steady star that is moving. It does not blink and it makes no sound. Planes blink, and usually have more than one light.</li>
+      <li>It moves at about the pace of a plane high overhead, taking a few minutes to cross the sky. You do not need binoculars, and with binoculars you will find it harder to follow.</li>
+      <li>Towards the end of an evening pass it may turn orange and fade while still high up. That is the station flying into the Earth's shadow, and it is the best part.</li>
+      <li>While a pass is under way the site switches to "Look NW, 34° above the horizon" and updates as the station moves, if you have it open.</li>
+    </ul>
+
+    <h2 id="trust">How far to trust it</h2>
+    <p>Predictions come from the station's current orbit, published by Celestrak as a short set of numbers that the site refreshes every two hours. The pill under the map says how old that set is. With fresh numbers the times are good to a few seconds for the next few days and to a minute or so a week out, which is why the list stops at ten days.</p>
+    <p>Two things can move a pass. The station is slowly dragged down by the thin air at its height, and every few weeks its engines push it back up; after a boost the old numbers are wrong until the next refresh. And the brightness is an estimate: the station's huge solar panels can catch the Sun and flare for a few seconds, which no prediction includes. If the pill ever says the numbers are days old, the site could not reach Celestrak, and the times should be treated with care until it can.</p>
+
+    <h2 id="credits">Credits</h2>
+    <p>Map styling inspired by the European Space Agency's <a href="https://isstracker.spaceflight.esa.int/" rel="noopener">ESA ISS Tracker</a>. The orbit is computed with <a href="https://github.com/brandon-rhodes/python-sgp4" rel="noopener">sgp4</a> from elements published by <a href="https://celestrak.org/" rel="noopener">Celestrak</a>. The Moon's position comes from <a href="https://github.com/cosinekitty/astronomy" rel="noopener">astronomy.browser.js</a>. Place search and sky forecasts are from <a href="https://open-meteo.com/" rel="noopener">Open-Meteo</a>. The same engine runs the <a href="https://github.com/mattbratt/iss_track" rel="noopener">ISS Track integration for Home Assistant</a>, and this site's source is on <a href="https://github.com/mattbratt/iss_track_web" rel="noopener">GitHub</a>.</p>
+
+    <a href="/" class="back">
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M11 18l-6-6 6-6"/></svg>
+      Back to the map
+    </a>
+  </article>
+</div>
+
+<footer class="foot">
+  <p>ISS Track (web) is free and open source, and stores nothing about you.</p>
+</footer>
+</body>
+</html>

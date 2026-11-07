@@ -24,6 +24,9 @@
     <span id="where-name">Choose a place</span>
     <svg viewBox="0 0 24 24" aria-hidden="true" class="chev"><path d="M6 9l6 6 6-6"/></svg>
   </button>
+  <button id="bell" class="icon-btn" aria-label="Remind me" title="REMIND ME: add the passes that match to your calendar, with a reminder before each one.">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15L6 16zM10 20a2 2 0 0 0 4 0"/></svg>
+  </button>
   <button id="gear" class="icon-btn" aria-label="Pass settings" title="PASS SETTINGS: choose which passes count. Saved in this browser.">
     <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
   </button>
@@ -31,6 +34,9 @@
   <button id="fullscreen-toggle" class="icon-btn" aria-label="Full screen" title="FULL SCREEN: show the map on its own.">
     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>
   </button>
+  <a href="/guide" class="icon-btn" aria-label="Guide" title="GUIDE: how to see the station, and what everything on this page means.">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.7.3-1 .8-1 1.7M12 17h.01"/></svg>
+  </a>
 </header>
 
 <main id="tracker-container">
@@ -81,6 +87,7 @@
 </main>
 
 <footer class="foot">
+  <p>New to this? Read the <a href="/guide">guide</a>: how to see the station, and what everything on this page means.</p>
   <p>Your location is rounded to about a kilometre before it leaves this browser, is used only to predict passes and fetch the sky forecast, and is not stored on the server. Places and settings are remembered in this browser only.</p>
   <p>Map styling inspired by the <a href="https://isstracker.spaceflight.esa.int/" rel="noopener">ESA ISS Tracker</a> · orbits by <a href="https://github.com/brandon-rhodes/python-sgp4" rel="noopener">sgp4</a> · orbital elements from <a href="https://celestrak.org/" rel="noopener">Celestrak</a> · Moon by <a href="https://github.com/cosinekitty/astronomy" rel="noopener">astronomy.browser.js</a> · places and sky forecast by <a href="https://open-meteo.com/" rel="noopener">Open-Meteo</a> · also a <a href="https://github.com/mattbratt/iss_track" rel="noopener">Home Assistant integration</a> · <a href="https://github.com/mattbratt/iss_track_web" rel="noopener">source</a></p>
 </footer>
@@ -122,6 +129,10 @@
     <div id="where-recent" class="where-list"></div>
     <p class="ps-note where-foot">Places are remembered in this browser only. Pass times are shown in the place's own time zone.</p>
   </div>
+</div>
+
+<div id="remindModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="remind-title">
+  <div class="ps-sheet remind-sheet" id="remind-sheet"></div>
 </div>
 
 <div id="settingsModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="ps-sheet-title">

@@ -1,0 +1,135 @@
+/*
+ * ISS Track (web) guide: the reading page. Shares the tokens, top bar and
+ * footer with site.css; this file lays out the chapters.
+ */
+.guide-wrap {
+  width: 100%;
+  max-width: 1000px;
+  background: var(--iss-drawer);
+  border: 1px solid var(--iss-edge);
+  border-top: 0;
+  display: grid;
+  grid-template-columns: 200px minmax(0, 1fr);
+  gap: 28px;
+  padding: 22px 20px 30px;
+}
+.guide-toc {
+  position: sticky;
+  top: 12px;
+  align-self: start;
+  font-size: 0.85rem;
+  line-height: 2;
+  border-right: 1px solid var(--iss-border);
+  padding-right: 12px;
+}
+.guide-toc a {
+  display: block;
+  color: var(--iss-text2);
+  text-decoration: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.guide-toc a:hover { color: var(--iss-text); }
+.guide h1 {
+  font-size: 1.7rem;
+  font-weight: 700;
+  margin: 0 0 4px;
+}
+.guide .guide-sub {
+  font-size: 0.9rem;
+  color: var(--iss-text3);
+  margin: 0 0 16px;
+}
+.guide h2 {
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin: 30px 0 8px;
+  scroll-margin-top: 16px;
+}
+.guide h3 {
+  font-size: 1rem;
+  font-weight: 700;
+  margin: 18px 0 6px;
+  color: var(--iss-text2);
+}
+.guide p, .guide li {
+  font-size: 1rem;
+  line-height: 1.65;
+  color: rgba(255, 255, 255, 0.88);
+  margin: 0 0 12px;
+}
+.guide ul { padding-left: 20px; margin: 0 0 12px; }
+.guide li { margin-bottom: 6px; }
+.guide figure { margin: 14px 0 16px; }
+.guide figure svg { display: block; width: 100%; height: auto; }
+.guide figcaption {
+  font-size: 0.85rem;
+  color: var(--iss-text3);
+  margin-top: 6px;
+  line-height: 1.5;
+}
+.guide .aside {
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 8px;
+  padding: 12px 14px;
+  margin: 12px 0 16px;
+}
+.guide .aside p { margin: 0; font-size: 0.95rem; color: var(--iss-text2); }
+.guide .aside p + p { margin-top: 8px; }
+.guide .aside b { color: var(--iss-text); }
+.guide table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+  margin: 8px 0 16px;
+}
+.guide th, .guide td {
+  text-align: left;
+  padding: 9px 10px;
+  border-top: 1px solid var(--iss-border);
+  vertical-align: top;
+  line-height: 1.5;
+}
+.guide th {
+  color: var(--iss-text2);
+  font-weight: 700;
+  border-top: 0;
+  font-size: 0.85rem;
+}
+.guide td:first-child { white-space: nowrap; }
+.guide .pills { display: flex; gap: 8px; flex-wrap: wrap; margin: 6px 0 12px; }
+.guide .swatch {
+  display: inline-block;
+  width: 26px;
+  height: 0;
+  border-top: 3px solid currentColor;
+  vertical-align: middle;
+  margin-right: 8px;
+}
+.guide .swatch.dashed { border-top-style: dashed; }
+.guide .sw-white { color: #fff; }
+.guide .sw-yellow { color: #f5d020; }
+.guide .sw-green { color: var(--iss-ok); }
+.guide .sw-blue { color: var(--iss-info); }
+.guide .sw-grey { color: #bec2cc; }
+.guide dl { margin: 0 0 12px; }
+.guide dt { font-weight: 700; margin-top: 10px; }
+.guide dd { margin: 2px 0 0; color: rgba(255, 255, 255, 0.88); line-height: 1.6; }
+.guide .back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid var(--iss-border);
+  border-radius: 8px;
+  padding: 8px 12px;
+  color: var(--iss-text);
+  text-decoration: none;
+  font-size: 0.95rem;
+  margin-top: 20px;
+}
+.guide .back:hover { background: var(--iss-neutral-bg); }
+@media screen and (max-width: 768px) {
+  .guide-wrap { grid-template-columns: minmax(0, 1fr); gap: 0; padding: 18px 14px 26px; }
+  .guide-toc { display: none; }
+}

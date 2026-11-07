@@ -21,7 +21,9 @@ const KEYS = {
   settings: 'iss_track_web.settings',
   metric: 'iss_track_web.metric',
   open: 'iss_track_web.passes_open',
+  remind: 'iss_track_web.remind',
 };
+const REMIND_CHOICES = [5, 10, 15, 30];
 const remember = {
   get(key, fallback) {
     try {
@@ -93,6 +95,7 @@ let recent = (remember.get(KEYS.recent, []) || []).map(cleanObserver).filter(Boo
 let settings = cleanSettings(remember.get(KEYS.settings, null));
 let metric = remember.get(KEYS.metric, !IMPERIAL_LOCALES.includes(navigator.language));
 let open = remember.get(KEYS.open, true) !== false;
+let remind = REMIND_CHOICES.includes(remember.get(KEYS.remind, 10)) ? remember.get(KEYS.remind, 10) : 10;
 
 let data = null;
 let failure = null;
@@ -579,6 +582,120 @@ function closeSettings() {
   $('gear').focus();
 }
 
+// ----- the reminder sheet: a calendar feed for this place and settings ------
+
+const CALENDAR_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>';
+const COPY_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg>';
+
+function joinWords(words) {
+  if (words.length <= 1) return words.join('');
+  return `${words.slice(0, -1).join(', ')} and ${words[words.length - 1]}`;
+}
+
+/* The settings in a few words, for the sheet's "For" line. */
+function settingsSummary() {
+  const qualities = joinWords(S.QUALITY_ORDER.filter((q) => settings.qualities.includes(q)).map((q) => S.QUALITY[q].label));
+  const when = settings.evening && settings.morning ? 'evenings and mornings' : settings.morning ? 'mornings' : 'evenings';
+  return `${qualities} · magnitude ${S.formatMagnitude(settings.faintest_magnitude)} or brighter · ${when}`;
+}
+
+function feedUrl() {
+  const params = new URLSearchParams({
+    latitude: String(observer.latitude),
+    longitude: String(observer.longitude),
+    name: placeLabel(observer),
+    qualities: settings.qualities.join(','),
+    faintest_magnitude: String(settings.faintest_magnitude),
+    evening: String(settings.evening),
+    morning: String(settings.morning),
+    sky_limit: settings.sky_limit,
+    remind: String(remind),
+  });
+  return `${window.location.origin}/calendar.ics?${params}`;
+}
+
+function remindHtml() {
+  const head = '<div class="ps-sheet-head"><h2 id="remind-title">Remind me</h2>'
+    + S.pill('neutral', 'Place and settings baked in', 'BAKED IN: the feed address carries this place and these settings. Change them later and subscribe again.')
+    + '<button id="remind-close" class="ps-icon" aria-label="Close" title="CLOSE">×</button></div>';
+  if (!observer) {
+    return head
+      + '<p class="remind-lead">Your calendar can remind you before every pass that matches your settings. Choose where you are watching from first.</p>'
+      + '<p style="margin:14px 0 0"><button id="remind-choose" class="ps-action" title="WATCHING FROM: choose a place.">Choose a place</button></p>';
+  }
+  const url = feedUrl();
+  const webcal = url.replace(/^https?:/, 'webcal:');
+  const choices = REMIND_CHOICES.map((minutes) => (
+    `<button data-remind="${minutes}" class="${minutes === remind ? 'on' : ''}">${minutes} min</button>`
+  )).join('');
+  return head
+    + '<p class="remind-lead">Your calendar does the reminding. Subscribe once, and every pass that matches your settings appears as an event for the next 10 days, kept up to date by itself.</p>'
+    + '<p class="ps-h">For</p>'
+    + `<p class="remind-for">${S.escapeHtml(placeLabel(observer))} <span>· ${S.escapeHtml(settingsSummary())}</span></p>`
+    + '<p class="ps-h">Remind me</p>'
+    + `<div class="ps-seg" id="remind-lead" title="LEAD TIME: how long before the pass starts the reminder goes off.">${choices}<button disabled style="color:var(--iss-text3)">before</button></div>`
+    + '<p class="ps-h">Subscribe</p>'
+    + '<div class="remind-actions">'
+    + `<a id="remind-open" class="remind-btn primary" href="${S.escapeHtml(webcal)}" title="OPEN IN MY CALENDAR: hands the feed to your calendar app, which asks to subscribe.">${CALENDAR_SVG}Open in my calendar</a>`
+    + `<button id="remind-copy" class="remind-btn" title="COPY ADDRESS: for Google Calendar and Outlook on the web.">${COPY_SVG}Copy address</button>`
+    + '<span id="remind-copied"></span></div>'
+    + `<div class="remind-addr" id="remind-addr" title="FEED ADDRESS: paste this where your calendar asks for a URL.">${S.escapeHtml(url)}</div>`
+    + '<p class="ps-h">How to add it</p>'
+    + '<div class="remind-how">'
+    + '<b>iPhone, Mac</b><span>Open in my calendar, then Subscribe. Reminders arrive like any other event.</span>'
+    + '<b>Google</b><span>Copy the address. In Google Calendar on the web: Other calendars, +, From URL, paste. Google refreshes feeds slowly, sometimes once a day.</span>'
+    + '<b>Outlook</b><span>Copy the address. Add calendar, Subscribe from web, paste.</span>'
+    + '</div>'
+    + '<p class="ps-note" style="margin:14px 0 0">The address holds this place and these settings. If you change your pass settings later, subscribe again. The forecast in each event is the one at the time your calendar last fetched the feed, and a pass is never dropped for weather.</p>';
+}
+
+async function copyFeed() {
+  const text = feedUrl();
+  let copied = false;
+  try {
+    await navigator.clipboard.writeText(text);
+    copied = true;
+  } catch (err) {
+    const range = document.createRange();
+    range.selectNodeContents($('remind-addr'));
+    const selection = window.getSelection();
+    selection.removeAllRanges();
+    selection.addRange(range);
+    try { copied = document.execCommand('copy'); } catch (err2) { copied = false; }
+  }
+  $('remind-copied').innerHTML = copied
+    ? S.pill('on', 'Copied', 'COPIED: the address is on your clipboard.')
+    : S.pill('dim', 'Select and copy the address below', 'COPY FAILED: this browser would not copy on its own.');
+}
+
+function buildRemind() {
+  $('remind-sheet').innerHTML = remindHtml();
+  $('remind-close').addEventListener('click', closeRemind);
+  if (!observer) {
+    $('remind-choose').addEventListener('click', () => { closeRemind(); openWhere(); });
+    return;
+  }
+  $('remind-lead').addEventListener('click', (event) => {
+    const button = event.target.closest('button[data-remind]');
+    if (!button) return;
+    remind = Number(button.dataset.remind);
+    remember.set(KEYS.remind, remind);
+    buildRemind();
+  });
+  $('remind-copy').addEventListener('click', copyFeed);
+}
+
+function openRemind() {
+  buildRemind();
+  $('remindModal').style.display = 'flex';
+  $('remind-close').focus();
+}
+
+function closeRemind() {
+  $('remindModal').style.display = 'none';
+  $('bell').focus();
+}
+
 // ----- units and the age of the elements ----------------------------------
 
 function applyUnits() {
@@ -617,6 +734,7 @@ $('ps-toggle').addEventListener('click', () => {
   render();
 });
 $('gear').addEventListener('click', openSettings);
+$('bell').addEventListener('click', openRemind);
 $('units').addEventListener('click', () => {
   metric = !metric;
   remember.set(KEYS.metric, metric);
@@ -646,7 +764,7 @@ $('where-recent').addEventListener('click', (event) => {
   const row = event.target.closest('.where-row');
   if (row) chooseObserver(recent[Number(row.dataset.index)]);
 });
-for (const [modal, close] of [['settingsModal', closeSettings], ['whereModal', closeWhere]]) {
+for (const [modal, close] of [['settingsModal', closeSettings], ['whereModal', closeWhere], ['remindModal', closeRemind]]) {
   $(modal).addEventListener('click', (event) => {
     if (event.target === $(modal)) close();
   });
@@ -655,6 +773,7 @@ document.addEventListener('keydown', (event) => {
   if (event.key !== 'Escape') return;
   if ($('settingsModal').style.display === 'flex') closeSettings();
   if ($('whereModal').style.display === 'flex') closeWhere();
+  if ($('remindModal').style.display === 'flex') closeRemind();
 });
 document.addEventListener('visibilitychange', () => {
   if (!document.hidden && data) load();

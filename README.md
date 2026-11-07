@@ -13,6 +13,8 @@ See the [changelog](CHANGELOG.md) for what is new in each version.
 - Every pass you can see in the next 10 days from the place you are watching from, with the next matching pass drawn in green on the map and a blue ring showing where the station has to be for you to see it.
 - A note when the station is about to cross your sky with nothing to see, and why: it is in Earth's shadow, or your sky is too bright. That stretch of track is drawn dashed and grey.
 - A sky forecast for each pass, from Open-Meteo's hourly cloud cover at your place.
+- A calendar feed of your matching passes, so your own calendar reminds you before each one.
+- A guide that explains all of it in plain language.
 - A live video feed from the station when you click its icon (via YouTube).
 
 ## Where you are watching from
@@ -20,6 +22,16 @@ See the [changelog](CHANGELOG.md) for what is new in each version.
 - **Use my location** asks your browser for its position once. The position is rounded to about a kilometre before it leaves your browser, is used only to predict passes and fetch the sky forecast, and is not stored on the server.
 - **A place** finds a town or city by name. Pass times are shown in that place's own time zone.
 - Up to five recent places are remembered in your browser. Nothing is remembered anywhere else.
+
+## Reminders
+
+The bell in the top bar lets your own calendar remind you. It gives you a calendar feed for your place and your pass settings. Subscribe once, with **Open in my calendar** on an iPhone or a Mac, or by copying the address into Google Calendar or Outlook, and every matching pass for the next ten days appears as an event with a reminder 5, 10, 15 or 30 minutes before. Calendars fetch the feed again every few hours, so it keeps itself current.
+
+The feed's address carries the place and the settings you had when you made it, so after changing your settings, subscribe again. The sky forecast is written into each event and never drops a pass. Your calendar app or service fetches the address itself, so the site has to be reachable from where that app runs: a phone or Google Calendar needs the public address, not one on your own network.
+
+## The guide
+
+The question mark in the top bar opens a plain-language guide at `/guide`: what the map shows, why passes happen at dusk and dawn, a gentle chapter on orbits, how to read a pass, the settings, privacy, and what to do when you step outside.
 
 ## Pass settings
 
