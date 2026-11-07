@@ -494,6 +494,13 @@ a.icon-btn { text-decoration: none; }
   text-align: center;
   margin: 0 0 6px;
 }
+.remind-hint.reach {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+}
 .remind-actions {
   display: flex;
   gap: 10px;

@@ -32,7 +32,7 @@ The bell in the top bar lets your own calendar remind you, 5, 10, 15 or 30 minut
 - **On Android**, it opens Google Calendar's add-a-calendar page for the same feed.
 - **Google Calendar** and **Outlook.com** are one-step subscribe links on every device, through the add-by-address pages both services provide. A Microsoft 365 work account has its own link under "More ways to add it", with the feed address for any other calendar.
 
-The file and the feed carry the place and the settings you had when you made them, so after changing your settings, add it again. The sky forecast is written into each event and never drops a pass. A subscribing calendar fetches the address itself, so for a subscription the site has to be reachable from where that calendar runs: a phone or Google Calendar needs the public address, not one on your own network. The downloaded file has no such need.
+The file and the feed carry the place and the settings you had when you made them, so after changing your settings, add it again. The sky forecast is written into each event and never drops a pass. A subscribing calendar fetches the address itself, so for a subscription the site has to be reachable from where that calendar runs: a phone or Google Calendar needs the public address, not one on your own network. The sheet says so when it is opened at a private address. The downloaded file has no such need.
 
 ## The guide
 

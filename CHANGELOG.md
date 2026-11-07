@@ -2,6 +2,11 @@
 
 All notable changes to ISS Track (web) are listed here, newest first.
 
+## 1.2.1 - 2026-11-07
+
+### Added
+- **A warning on a private address.** When the site is opened at a home-network address (localhost, 192.168.x.x and the like), the Remind me sheet says that Google Calendar and Outlook.com fetch the feed from their own servers and cannot reach it, so nobody adds a calendar that stays empty. The calendar file is unaffected.
+
 ## 1.2.0 - 2026-11-07
 
 ### Changed

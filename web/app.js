@@ -607,6 +607,30 @@ function device() {
   return 'desktop';
 }
 
+/* True when the page is served from an address only this network can reach.
+ * Google Calendar and Outlook.com fetch a feed from their own servers, so a
+ * subscription made from such an address would stay empty for ever. */
+function privateOrigin(host = window.location.hostname) {
+  if (!host || host === 'localhost' || host === '::1' || host === '[::1]') return true;
+  if (/\.(localhost|local|lan|home|internal|arpa)$/i.test(host)) return true;
+  const ipv4 = host.match(/^(\d+)\.(\d+)\.\d+\.\d+$/);
+  if (ipv4) {
+    const a = Number(ipv4[1]);
+    const b = Number(ipv4[2]);
+    return a === 10 || a === 127 || a === 0 || (a === 192 && b === 168) || (a === 172 && b >= 16 && b <= 31) || (a === 169 && b === 254);
+  }
+  if (host.includes(':')) return /^\[?f[cd][0-9a-f]{2}:/i.test(host) || /^\[?fe80:/i.test(host);
+  return !host.includes('.');
+}
+
+/* The warning shown when the site is on a private address: the two services
+ * that subscribe by fetching cannot reach it; the file still works. */
+function reachHtml() {
+  const host = window.location.hostname;
+  return `<p class="remind-hint reach">${S.pill('warn', 'Not reachable from the internet', 'NOT REACHABLE: this site is on a private address, so Google and Outlook cannot fetch the feed from it.')}`
+    + `<span>Google Calendar and Outlook.com fetch the feed from their own servers, which cannot reach ${S.escapeHtml(host)}. Those two work from the site's public address. The calendar file works from anywhere.</span></p>`;
+}
+
 function joinWords(words) {
   if (words.length <= 1) return words.join('');
   return `${words.slice(0, -1).join(', ')} and ${words[words.length - 1]}`;
@@ -679,17 +703,19 @@ function routesHtml(routes, kind, count) {
   const outlook = routeButton('remind-outlook', routes.outlook, LINK_SVG, 'Outlook.com',
     'OUTLOOK.COM: opens Outlook on the web, which asks to add this feed. It keeps itself up to date.', { blank: true });
   const fileHint = `Saves a file with the next 10 days. Open it and your calendar adds ${count ? `all ${passesWord(count)}` : 'the passes'}, each with its reminder. The file does not update itself, so come back for more.`;
+  const away = privateOrigin() ? reachHtml() : '';
   if (kind === 'ios') {
     return routeButton('remind-apple', routes.webcal, CALENDAR_SVG, 'Add to Apple Calendar',
       'ADD TO APPLE CALENDAR: one tap, then Subscribe. The calendar keeps itself up to date.', { primary: true })
       + '<p class="remind-hint">One tap, then Subscribe. Updates itself, reminders included.</p>'
       + `<div class="remind-grid">${google}${routeButton('remind-file', routes.download, DOWNLOAD_SVG, 'Calendar file',
-        `CALENDAR FILE: ${fileHint}`)}</div>`;
+        `CALENDAR FILE: ${fileHint}`)}</div>`
+      + away;
   }
   if (kind === 'android') {
     return routeButton('remind-google', routes.google, LINK_SVG, 'Add to Google Calendar',
       'ADD TO GOOGLE CALENDAR: opens Google Calendar, which asks to add this feed. It keeps itself up to date.', { primary: true, blank: true })
-      + '<p class="remind-hint">Google asks once, then keeps the passes up to date.</p>'
+      + (away || '<p class="remind-hint">Google asks once, then keeps the passes up to date.</p>')
       + `<div class="remind-grid">${routeButton('remind-file', routes.download, DOWNLOAD_SVG, 'Calendar file',
         `CALENDAR FILE: ${fileHint}`, { save: true })}${outlook}</div>`;
   }
@@ -697,7 +723,7 @@ function routesHtml(routes, kind, count) {
     `DOWNLOAD CALENDAR FILE: ${fileHint}`, { primary: true, save: true })
     + `<p class="remind-hint">${S.escapeHtml(fileHint)}</p>`
     + `<div class="remind-grid">${google}${outlook}</div>`
-    + '<p class="remind-hint">Those two subscribe in one step and keep themselves up to date.</p>';
+    + (away || '<p class="remind-hint">Those two subscribe in one step and keep themselves up to date.</p>');
 }
 
 /* The fold: the feed itself, for calendars that take an address. */
@@ -708,7 +734,8 @@ function moreHtml(routes, kind) {
   const office = `<a href="${S.escapeHtml(routes.office)}" target="_blank" rel="noopener" title="MICROSOFT 365: for a work or school Outlook account.">Microsoft 365 work account</a>`;
   return '<details class="remind-more">'
     + '<summary title="MORE WAYS: the feed address, for any calendar that subscribes by address.">More ways to add it</summary>'
-    + '<p class="remind-note">This is a calendar feed. Any calendar that subscribes by address can use it, and it refreshes itself every few hours.</p>'
+    + '<p class="remind-note">This is a calendar feed. Any calendar that subscribes by address can use it, and it refreshes itself every few hours.'
+    + (privateOrigin() ? ' A calendar service on the internet cannot reach this address; a calendar app on this network can.' : '') + '</p>'
     + `<div class="remind-actions">${webcal}`
     + `<button id="remind-copy" class="remind-btn" title="COPY ADDRESS: for any calendar that asks for a URL.">${COPY_SVG}<span>Copy address</span></button>`
     + '<span id="remind-copied"></span></div>'
