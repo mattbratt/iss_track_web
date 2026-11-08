@@ -11,7 +11,9 @@ services:
       # Behind the tunnel, request limits apply per visitor, not per tunnel.
       ISS_TRACK_TRUST_PROXY: "1"
     volumes:
-      # The last good orbital elements, kept across restarts.
+      # The last good orbital elements, kept across restarts. Create the
+      # data folder before the first start: Synology's Docker does not make
+      # a missing bind-mount folder, and the start fails without it.
       - ./data:/data
     ports:
       # Reachable on your own network as well, at http://<host>:8765

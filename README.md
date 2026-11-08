@@ -71,11 +71,12 @@ The site is one small container. It fetches fresh orbital elements from Celestra
 
 This is how the public site is hosted. A Cloudflare Tunnel gives the site HTTPS and a public address without opening any ports on your router, and visitors never see your home IP address. The tunnel is free; it needs a domain whose DNS is managed by Cloudflare.
 
-1. In DSM, open **Container Manager** (the Docker package on older DSM) and create a project folder, for example `/volume1/docker/iss_track_web`.
-2. Copy `docker-compose.yml` and `.env.example` from this repository into that folder, and rename `.env.example` to `.env`.
-3. In the Cloudflare Zero Trust dashboard, under **Networks, Tunnels**, create a tunnel and copy its token into `.env` as `CLOUDFLARE_TUNNEL_TOKEN`.
-4. Give the tunnel a public hostname, for example `iss.example.com`, with service type `HTTP` and URL `iss_track_web:8000`.
-5. In Container Manager, create a project from the folder and start it. The site is up at your hostname within a minute. On your own network it is also at `http://<nas-address>:8765`.
+1. In DSM's File Station, create a project folder, for example `docker/iss_track_web`, and inside it an empty folder named `data`. DSM's Docker does not create a missing bind-mount folder, so without `data` the first start fails with "Bind mount failed".
+2. Copy `docker-compose.yml` and `.env.example` from this repository into the project folder, and rename `.env.example` to `.env`.
+3. In the Cloudflare dashboard, under **Networking, Tunnels**, create a tunnel. Its page shows a Docker command ending in `--token` and a long string; put that string in `.env` as `CLOUDFLARE_TUNNEL_TOKEN`. The page waits for a connection before it lets you continue, which is the next step.
+4. In **Container Manager**, open **Project**, click **Create**, choose the project folder and **Use existing docker-compose.yml**, and finish. Both containers start, and the tunnel shows as **Healthy** within a minute.
+5. Back on the tunnel's page, add a route of type **Published application**, with the subdomain and domain you want, for example `iss.example.com`, and the service URL `http://iss_track_web:8000`. The site is up at that hostname straight away. On your own network it is also at `http://<nas-address>:8765`.
+6. Under the domain's **SSL/TLS, Edge Certificates**, turn on **Always Use HTTPS**, so a visitor who types the bare hostname lands on the secure page, where the location button works.
 
 Without a domain, DSM's own reverse proxy with a Let's Encrypt certificate on a `synology.me` name works too, but that means opening port 443 on your router and the site runs at your home IP address.
 
