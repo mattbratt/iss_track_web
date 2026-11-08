@@ -2,6 +2,11 @@
 
 All notable changes to ISS Track (web) are listed here, newest first.
 
+## 1.2.2 - 2026-11-07
+
+### Fixed
+- **The Google Calendar button works.** Google's add-a-calendar page accepts only the `webcal://` form of a feed address; given `https://` it said "Unable to add calendar. Check the URL." The button now hands it the webcal address. Found on the first public deployment, at iss.whereisitin.space.
+
 ## 1.2.1 - 2026-11-07
 
 ### Added

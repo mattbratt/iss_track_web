@@ -662,16 +662,19 @@ function feedUrl(extra = {}) {
 /* Every way into a calendar, each a link. Google and Outlook.com have a page
  * that takes a feed address and asks to add it; the webcal link is the same
  * feed for Apple Calendar and desktop Outlook; the download is the feed as a
- * file, which the person opens and their calendar imports. */
+ * file, which the person opens and their calendar imports. Google's page
+ * accepts only the webcal form of the address: given https it answers
+ * "Unable to add calendar. Check the URL." */
 function calendarRoutes() {
   const feed = feedUrl();
+  const webcal = feed.replace(/^https?:/, 'webcal:');
   const encoded = encodeURIComponent(feed);
   const title = encodeURIComponent(`ISS passes, ${placeLabel(observer)}`);
   return {
     feed,
-    webcal: feed.replace(/^https?:/, 'webcal:'),
+    webcal,
     download: feedUrl({ download: '1' }),
-    google: `https://calendar.google.com/calendar/render?cid=${encoded}`,
+    google: `https://calendar.google.com/calendar/render?cid=${encodeURIComponent(webcal)}`,
     outlook: `https://outlook.live.com/calendar/0/addfromweb?url=${encoded}&name=${title}`,
     office: `https://outlook.office.com/calendar/0/addfromweb?url=${encoded}&name=${title}`,
   };
