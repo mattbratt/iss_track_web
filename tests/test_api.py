@@ -1,6 +1,7 @@
 """The HTTP surface: shapes, refusals, headers and the static files."""
 from __future__ import annotations
 
+import math
 import re
 from pathlib import Path
 
@@ -207,8 +208,10 @@ def test_the_privacy_page_is_served_and_says_what_is_true(client):
     for chapter in ("short", "location", "browser", "reminders", "visits", "services", "server", "questions"):
         assert f'<h2 id="{chapter}">' in page.text, chapter
     # The claims the rest of the code has to keep true.
-    assert "rounded to about a kilometer" in page.text
-    assert "It keeps no log of requests." in page.text
+    assert "only to within about half a mile (0.8 km)" in page.text
+    assert '<h3 id="precision">' in page.text
+    assert "It keeps a log of requests" in page.text
+    assert "The log does not record your internet address." in page.text
     assert "Nothing is loaded from YouTube until you open the video." in page.text
     assert "Cloudflare says this uses no cookies" in page.text
     # Without the slash it leads to the page.
@@ -217,11 +220,18 @@ def test_the_privacy_page_is_served_and_says_what_is_true(client):
 
 
 def test_the_code_keeps_the_privacy_pages_promises():
-    # "It keeps no log of requests": the container runs without one, and no
-    # log line carries a position.
-    assert '"--no-access-log"' in (ROOT / "Dockerfile").read_text(encoding="utf-8")
-    hub = (ROOT / "server" / "hub.py").read_text(encoding="utf-8")
-    assert "latitude, longitude, err)" not in hub
+    # "It keeps a log of requests": the container runs with one. Turning it
+    # off, or logging more than the page says, means rewriting the page.
+    assert "--no-access-log" not in (ROOT / "Dockerfile").read_text(encoding="utf-8").split("CMD")[-1]
+    # "to within about half a mile": two decimal places, rounded in the browser
+    # before anything is sent. Half the diagonal of a 0.01 degree square at the
+    # equator, where it is largest, is the farthest the true spot can be.
+    app = (ROOT / "web" / "app.js").read_text(encoding="utf-8")
+    assert "latitude: Number(latitude.toFixed(2))," in app
+    assert "longitude: Number(longitude.toFixed(2))," in app
+    farthest_km = math.hypot(0.005 * 111.32, 0.005 * 111.32)
+    assert 0.75 < farthest_km < 0.80
+    assert farthest_km * 0.6214 < 0.5
     # "Nothing is loaded from YouTube until you open the video": the frame
     # has no address of its own until the page's code gives it one.
     index = (ROOT / "web" / "index.html").read_text(encoding="utf-8")

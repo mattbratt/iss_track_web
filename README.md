@@ -27,7 +27,7 @@ See the [changelog](CHANGELOG.md) for what is new in each version.
 
 The site has a privacy policy at `/privacy`, linked from the bottom of every page. It says what happens to a visitor's location, what the browser remembers, what a calendar address reveals, how visits are counted, and which other services are involved. Nothing about any of that is stated anywhere else, so there is one place to keep true.
 
-The policy describes the public site at `iss.whereisitin.space`. If you host a copy, it is yours to keep accurate: the page is `web/privacy/index.html`. The container runs without a request log, so the server keeps no record of requests.
+The policy describes the public site at `iss.whereisitin.space`. If you host a copy, it is yours to keep accurate: the page is `web/privacy/index.html`. The server keeps its request log, where each pass request shows the visitor's position rounded to two decimal places, within about half a mile, and the policy says so. Behind a tunnel or proxy the log shows that connection's address; served directly, it shows each visitor's, which your policy would have to say.
 
 ## Reminders
 

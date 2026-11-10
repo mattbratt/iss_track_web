@@ -5,13 +5,12 @@ All notable changes to ISS Track (web) are listed here, newest first.
 ## 1.2.4 - 2026-11-10
 
 ### Added
-- **A privacy policy.** A page at `/privacy`, linked from the bottom of the site, says in plain language what happens to your location, what your browser remembers, what a calendar address reveals, how visits are counted and which other services are involved. Statements about this used to be spread over the footer, the place picker, the guide and the README; they now live in that one place.
+- **A privacy policy.** A page at `/privacy`, linked from the bottom of the site, says in plain language what happens to your location and how coarsely the site knows it (to within about half a mile), what the server's log holds, what your browser remembers, what a calendar address reveals, how visits are counted and which other services are involved. Statements about this used to be spread over the footer, the place picker, the guide and the README; they now live in that one place.
 
 ### Changed
 - **Credits.** The site is credited to Matthew Baker, first. The ESA ISS Tracker, whose map styling inspired this one, is credited last.
 - **Cloudflare Web Analytics is allowed.** The content security policy lets a page load Cloudflare's analytics script and report to it, so a site hosted behind Cloudflare can count visits and measure page load times. They are the only two outside addresses the page may run code from or talk to. The policy used to refuse the script, which logged an error on every page load of the public site.
 - **The live video is fetched only when you open it.** The YouTube player used to load with every page, whether or not anyone watched.
-- **The server keeps no request log.** The container runs without one, and a failed sky forecast no longer writes a position to the log.
 - **US spelling throughout**, on the pages and in the code.
 
 ## 1.2.3 - 2026-11-10

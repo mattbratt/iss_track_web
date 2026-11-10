@@ -31,7 +31,8 @@
     <ul>
       <li>There are no accounts, no advertising, and no cookies set by this site.</li>
       <li>The site does not ask who you are.</li>
-      <li>Your location is rounded to about a kilometer, a little over half a mile, before it leaves your browser, and the site does not save it.</li>
+      <li>Your location is blurred in your browser before it is sent anywhere. The site learns it only to within about half a mile (0.8 km): the neighborhood, not the street or the building.</li>
+      <li>The server keeps a log of requests. It holds that blurred location, and not your internet address.</li>
       <li>Visits are counted, without cookies, by Cloudflare, the company that delivers the site.</li>
       <li>Nothing is sold, and nothing is shared for advertising.</li>
     </ul>
@@ -39,10 +40,15 @@
     <h2 id="location">Your location</h2>
     <p>Passes depend on where you stand, so the site needs a place. You can give it one in two ways.</p>
     <ul>
-      <li><b>Use my location.</b> Your browser asks your permission first. If you agree, it hands the page your position once. The page rounds it to about a kilometer before sending it anywhere, and does not keep the exact one.</li>
-      <li><b>A place.</b> You type a town or city, and what you type is sent to the site to find matching places.</li>
+      <li><b>Use my location.</b> Your browser asks your permission first. If you agree, it hands the page your position once. The page blurs it, as described below, before sending it anywhere, and does not keep the exact one.</li>
+      <li><b>A place.</b> You type a town or city, and what you type is sent to the site to find matching places. The place you pick is blurred in the same way.</li>
     </ul>
-    <p>The rounded position goes to the site's server, which uses it to predict your passes and to fetch the sky forecast. The server holds the results in its memory for a while, so that it does not repeat the same calculation, and writes none of it to disk. It keeps no log of requests.</p>
+
+    <h3 id="precision">How precisely the site knows where you are</h3>
+    <p>Not very, and on purpose. The page rounds your latitude and longitude to two decimal places. That sorts the whole world into squares about 0.7 miles (1.1 km) from north to south and a little less from east to west. All the site ever learns is which square you are in.</p>
+    <p>The point it works with can be as much as half a mile from where you really are. In a town, one square holds hundreds or thousands of homes. In open country it may hold only a few. Either way the site cannot tell which street or which building you are in.</p>
+    <p>That is still plenty for its purpose. The station flies so high that a pass looks the same from anywhere within a few miles, so a sharper position would not make a better prediction.</p>
+    <p>The blurred position goes to the site's server, which uses it to predict your passes and to fetch the sky forecast. The server holds the results in its memory for a while, so that it does not repeat the same calculation. The blurred position also appears in the server's log, which is described under <a href="#server">The server</a>.</p>
 
     <h2 id="browser">What your browser remembers</h2>
     <p>So that you do not start again on every visit, the page stores a few things in your own browser:</p>
@@ -58,7 +64,7 @@
     <p>A calendar that subscribes to the address, such as Google Calendar, Outlook or Apple Calendar, fetches it from that company's own servers every few hours. The company then knows the address, and so the place in it. What it does with that is covered by its own privacy policy.</p>
 
     <h2 id="visits">Counting visits</h2>
-    <p>The site reaches you through Cloudflare. Like any company that carries web traffic, Cloudflare sees the internet address (IP address) of each visitor and what was asked for, which includes the rounded position in a request for passes.</p>
+    <p>The site reaches you through Cloudflare. Like any company that carries web traffic, Cloudflare sees the internet address (IP address) of each visitor and what was asked for, which includes the blurred position in a request for passes.</p>
     <p>Cloudflare also adds a small script to each page, which counts page views and measures how quickly the pages load. Cloudflare says this uses no cookies, stores nothing in your browser, and does not follow you from one website to another.</p>
     <p>The site's owner sees the results as totals: how many visits there were, from which countries, on which kinds of device and browser, and which internet addresses made the most requests. That is used to keep the site working and to see how much it is used, and for nothing else. Cloudflare's handling of this is covered by <a href="https://www.cloudflare.com/privacypolicy/" rel="noopener">its privacy policy</a>.</p>
 
@@ -71,7 +77,9 @@
     <p>The page loads its pictures, fonts and scripts from the site itself. Apart from Cloudflare's counting script, nothing on it comes from anywhere else.</p>
 
     <h2 id="server">The server</h2>
-    <p>The server that runs the site has no accounts and no database of visitors. To stop anyone from overloading it, it counts requests per internet address for a few minutes, in memory only. It keeps no log of requests. The only thing it saves to disk is the station's orbit data.</p>
+    <p>The server that runs the site has no accounts and no database of visitors.</p>
+    <p>It keeps a log of requests, which is used to find and fix problems. Each entry holds the time, what was asked for, and whether it worked. What was asked for includes the blurred position in a request for passes, and the words typed into a place search. The log does not record your internet address. Requests reach the server through Cloudflare, so the only address the log notes is that connection's own.</p>
+    <p>To stop anyone from overloading it, the server also counts requests per internet address for a few minutes, in memory only. Apart from the log, the only thing it saves to disk is the station's orbit data.</p>
 
     <h2 id="changes">Changes to this page</h2>
     <p>If the site starts handling information differently, this page is updated first and the date at the top changes. Earlier versions are in the site's public <a href="https://github.com/mattbratt/iss_track_web/commits/main/web/privacy/index.html" rel="noopener">source history</a>.</p>
