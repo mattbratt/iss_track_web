@@ -3,6 +3,7 @@ from __future__ import annotations
 
 from conftest import NOW
 from server.hub import milliseconds
+from server.main import KEEP_A_DAY, REVALIDATE, cache_policy
 
 
 def test_health_and_track(client):
@@ -98,3 +99,71 @@ def test_page_and_vendor_assets_are_served_with_headers(client):
     assert 'href="#why"' in guide.text
     assert client.get("/guide", follow_redirects=False).status_code in (301, 307, 308)
     assert client.get("/guide.css").status_code == 200
+
+
+def test_the_page_and_its_code_are_checked_on_every_visit(client):
+    # A release changes these files and never their names, so a browser or a
+    # proxy that kept one for hours would run the old page.
+    for path in ("/", "/guide/", "/app.js", "/map.js", "/site.css", "/guide.css",
+                 "/vendor/iss-track-shared.js", "/vendor/astronomy.browser.js"):
+        reply = client.get(path)
+        assert reply.status_code == 200, path
+        assert reply.headers["cache-control"] == REVALIDATE, path
+        assert reply.headers["etag"], path
+
+
+def test_an_unchanged_script_costs_one_304(client):
+    first = client.get("/app.js")
+    again = client.get("/app.js", headers={"If-None-Match": first.headers["etag"]})
+    assert again.status_code == 304
+    assert again.content == b""
+    assert again.headers["cache-control"] == REVALIDATE
+
+
+def test_pictures_and_fonts_are_kept_for_a_day(client):
+    for path in ("/vendor/images/mapday.jpg", "/vendor/images/iss_tiny.png",
+                 "/vendor/fonts/RobotoCondensed-Regular.ttf"):
+        reply = client.get(path)
+        assert reply.status_code == 200, path
+        assert reply.headers["cache-control"] == KEEP_A_DAY, path
+
+
+def test_a_missing_file_is_never_kept(client):
+    for path in ("/vendor/images/nothing.png", "/nothing.js", "/nothing-here"):
+        reply = client.get(path)
+        assert reply.status_code == 404, path
+        assert reply.headers["cache-control"] == REVALIDATE, path
+
+
+def test_the_api_and_the_feed_keep_their_own_caching(client):
+    assert "cache-control" not in client.get("/api/health").headers
+    assert "cache-control" not in client.get("/api/track").headers
+    feed = client.get("/calendar.ics", params={"latitude": 40, "longitude": -75})
+    assert feed.headers["cache-control"] == "public, max-age=1800"
+    saved = client.get("/calendar.ics", params={"latitude": 40, "longitude": -75, "download": 1})
+    assert saved.headers["cache-control"] == "no-store"
+
+
+def test_cache_policy_by_path_and_status():
+    assert cache_policy("/", 200) == REVALIDATE
+    assert cache_policy("/guide", 307) == REVALIDATE
+    assert cache_policy("/APP.JS", 200) == REVALIDATE
+    assert cache_policy("/vendor/images/sun_128.png", 200) == KEEP_A_DAY
+    assert cache_policy("/vendor/images/sun_128.png", 304) == KEEP_A_DAY
+    assert cache_policy("/vendor/images/sun_128.png", 404) == REVALIDATE
+    assert cache_policy("/api/passes", 200) is None
+    assert cache_policy("/calendar.ics", 200) is None
+    assert cache_policy("/notes.txt", 200) is None
+
+
+def test_favicon_is_the_station_icon(client):
+    icon = client.get("/favicon.ico")
+    assert icon.status_code == 200
+    assert icon.headers["content-type"] == "image/png"
+    assert icon.headers["cache-control"] == KEEP_A_DAY
+    assert icon.content == client.get("/vendor/images/iss_tiny.png").content
+    assert icon.content.startswith(b"\x89PNG")
+
+    head = client.head("/favicon.ico")
+    assert head.status_code == 200
+    assert head.content == b""

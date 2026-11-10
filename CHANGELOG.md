@@ -2,6 +2,12 @@
 
 All notable changes to ISS Track (web) are listed here, newest first.
 
+## 1.2.3 - 2026-11-10
+
+### Fixed
+- **A new version reaches visitors at once.** The page, its scripts and its styles are now sent with `Cache-Control: no-cache`, so a browser or a proxy in front checks them on every visit and an unchanged file costs one short 304. They used to carry no caching instruction at all: Cloudflare kept them for four hours and browsers for as long as they pleased, so after 1.2.2 people ran the old page until they forced a reload. Pictures and fonts are kept for a day.
+- **`/favicon.ico` answers with the station icon.** Crawlers and some browsers ask for that address whatever icon the page names, and got a 404; it was a third of all the site's 404s in its first three days.
+
 ## 1.2.2 - 2026-11-07
 
 ### Fixed

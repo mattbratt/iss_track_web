@@ -14,7 +14,7 @@ from pathlib import Path
 
 import httpx
 from fastapi import FastAPI, HTTPException, Query, Request
-from fastapi.responses import JSONResponse, Response
+from fastapi.responses import FileResponse, JSONResponse, Response
 from fastapi.staticfiles import StaticFiles
 
 from .calendar import DEFAULT_REMIND, REMIND_CHOICES, content_disposition, render_calendar
@@ -44,6 +44,37 @@ SECURITY_HEADERS = {
         "frame-src https://www.youtube.com; base-uri 'none'; frame-ancestors 'self'"
     ),
 }
+
+# How long browsers and the proxy in front may keep a file without asking.
+# The page, its scripts and its styles change with every release and their
+# names do not, so they are checked on every visit: "no-cache" stores the
+# file but revalidates it, and an unchanged file costs one 304. Without this
+# a proxy picks its own lifetime (Cloudflare: four hours), and a release
+# reaches visitors late. Pictures and fonts change only with the engine.
+REVALIDATE = "no-cache"
+KEEP_A_DAY = "public, max-age=86400"
+KEPT_SUFFIXES = (".png", ".jpg", ".jpeg", ".gif", ".webp", ".svg", ".ico", ".ttf", ".woff", ".woff2")
+CHECKED_SUFFIXES = (".html", ".js", ".mjs", ".css")
+FAVICON = WWW / "images" / "iss_tiny.png"
+
+
+def cache_policy(path: str, status: int) -> str | None:
+    """The Cache-Control for a static reply, or None to leave it alone.
+
+    The API and the calendar feed decide for themselves. A picture or font is
+    kept for a day only when it was actually served: a 404 kept that long
+    would hide the file after it appears.
+    """
+    if path.startswith("/api/") or path == "/calendar.ics":
+        return None
+    lower = path.lower()
+    if lower.endswith(KEPT_SUFFIXES):
+        return KEEP_A_DAY if status in (200, 206, 304) else REVALIDATE
+    last = lower.rsplit("/", 1)[-1]
+    if lower.endswith(CHECKED_SUFFIXES) or "." not in last:
+        # A page ("/", "/guide/") or one of its scripts and styles.
+        return REVALIDATE
+    return None
 
 
 def data_dir() -> Path:
@@ -85,6 +116,10 @@ async def security_headers(request: Request, call_next):
     response = await call_next(request)
     for name, value in SECURITY_HEADERS.items():
         response.headers.setdefault(name, value)
+    if "cache-control" not in response.headers:
+        policy = cache_policy(request.url.path, response.status_code)
+        if policy:
+            response.headers["Cache-Control"] = policy
     return response
 
 
@@ -214,6 +249,13 @@ async def places(request: Request, q: str = Query(min_length=2, max_length=80)):
     limited(request)
     hub: Hub = request.app.state.hub
     return {"places": await hub.places(q)}
+
+
+@app.api_route("/favicon.ico", methods=["GET", "HEAD"], include_in_schema=False)
+async def favicon():
+    """The station icon. The page names its icon itself, but crawlers and some
+    browsers ask for this address whatever the page says, and used to get 404."""
+    return FileResponse(FAVICON, media_type="image/png")
 
 
 # The integration's own frontend assets: the shared module, fonts, images
