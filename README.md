@@ -21,7 +21,8 @@ See the [changelog](CHANGELOG.md) for what is new in each version.
 
 - **Use my location** asks your browser for its position once. The position is rounded to about a kilometre before it leaves your browser, is used only to predict passes and fetch the sky forecast, and is not stored on the server.
 - **A place** finds a town or city by name. Pass times are shown in that place's own time zone.
-- Up to five recent places are remembered in your browser. Nothing is remembered anywhere else.
+- Up to five recent places are remembered in your browser. The site itself keeps nothing else about you.
+- The public site at `iss.whereisitin.space` counts visits and page load times with Cloudflare Web Analytics, which Cloudflare says uses no cookies and does not follow people across websites. A copy you host yourself measures nothing unless you turn the same thing on.
 
 ## Reminders
 
@@ -79,6 +80,8 @@ This is how the public site is hosted. A Cloudflare Tunnel gives the site HTTPS 
 6. Under the domain's **SSL/TLS, Edge Certificates**, turn on **Always Use HTTPS**, so a visitor who types the bare hostname lands on the secure page, where the location button works.
 
 To update to a newer version later, select the project in Container Manager, click **Stop**, then **Action, Build**. The compose file's `pull_policy: always` makes that fetch the newest image; without that line the NAS keeps reusing the image it already has.
+
+Cloudflare's Web Analytics is optional and works as is. If it is on for the domain, Cloudflare adds its script to each page, and the site's content security policy allows that one script and the address it reports to. If you use it, say so to your visitors; the guide's wording names the public site only.
 
 Without a domain, DSM's own reverse proxy with a Let's Encrypt certificate on a `synology.me` name works too, but that means opening port 443 on your router and the site runs at your home IP address.
 

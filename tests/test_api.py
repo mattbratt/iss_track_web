@@ -167,3 +167,35 @@ def test_favicon_is_the_station_icon(client):
     head = client.head("/favicon.ico")
     assert head.status_code == 200
     assert head.content == b""
+
+
+def test_the_security_policy_names_every_outside_address(client):
+    # The page may run code from, and talk to, the site itself and the two
+    # Cloudflare Web Analytics addresses; the video frame is YouTube's. A new
+    # outside address has to be added here on purpose.
+    policy = dict(
+        part.strip().split(" ", 1)
+        for part in client.get("/").headers["content-security-policy"].split(";")
+    )
+    assert policy["default-src"] == "'self'"
+    assert policy["script-src"] == "'self' https://static.cloudflareinsights.com"
+    assert policy["connect-src"] == "'self' https://cloudflareinsights.com"
+    assert policy["style-src"] == "'self' 'unsafe-inline'"
+    assert policy["img-src"] == "'self' data:"
+    assert policy["font-src"] == "'self'"
+    assert policy["frame-src"] == "https://www.youtube.com"
+    assert policy["base-uri"] == "'none'"
+    assert policy["frame-ancestors"] == "'self'"
+    assert len(policy) == 9
+    # No inline or evaluated script, analytics or not.
+    assert "unsafe" not in policy["script-src"]
+
+    # The same policy rides on every reply, the API's included.
+    assert client.get("/api/health").headers["content-security-policy"] == client.get("/").headers["content-security-policy"]
+
+
+def test_the_guide_says_who_counts_visits(client):
+    guide = client.get("/guide/").text
+    assert "Cloudflare, which counts visits" in guide
+    assert "uses no cookies" in guide
+    assert "Nothing is remembered anywhere else" not in guide

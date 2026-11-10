@@ -2,6 +2,11 @@
 
 All notable changes to ISS Track (web) are listed here, newest first.
 
+## 1.2.4 - 2026-11-10
+
+### Changed
+- **Cloudflare Web Analytics is allowed.** The content security policy now lets a page load Cloudflare's analytics script and report to it, so a site hosted behind Cloudflare can count visits and measure page load times. They are the only two outside addresses the page may run code from or talk to; the policy used to refuse the script, which logged an error on every page load of the public site. The guide and the README now say that the public site counts visits this way, and that Cloudflare states it uses no cookies. A copy hosted elsewhere loads nothing new.
+
 ## 1.2.3 - 2026-11-10
 
 ### Fixed

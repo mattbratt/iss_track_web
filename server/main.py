@@ -34,13 +34,20 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name
 logging.getLogger("httpx").setLevel(logging.WARNING)
 
 USER_AGENT = "iss-track-web (https://github.com/mattbratt/iss_track_web)"
+# Cloudflare Web Analytics, for a site hosted behind Cloudflare with it turned
+# on: Cloudflare adds one script to each page, loaded from the first host, and
+# the script reports page views and load times to the second. They are the
+# only two addresses outside the site that the page may run code from or talk
+# to. Where Cloudflare is not in front, nothing ever asks for them.
+ANALYTICS_SCRIPT = "https://static.cloudflareinsights.com"
+ANALYTICS_REPORT = "https://cloudflareinsights.com"
 SECURITY_HEADERS = {
     "X-Content-Type-Options": "nosniff",
     "Referrer-Policy": "strict-origin-when-cross-origin",
     "Permissions-Policy": "geolocation=(self), fullscreen=(self)",
     "Content-Security-Policy": (
-        "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; "
-        "img-src 'self' data:; font-src 'self'; connect-src 'self'; "
+        f"default-src 'self'; script-src 'self' {ANALYTICS_SCRIPT}; style-src 'self' 'unsafe-inline'; "
+        f"img-src 'self' data:; font-src 'self'; connect-src 'self' {ANALYTICS_REPORT}; "
         "frame-src https://www.youtube.com; base-uri 'none'; frame-ancestors 'self'"
     ),
 }
