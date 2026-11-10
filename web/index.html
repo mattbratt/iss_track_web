@@ -30,7 +30,7 @@
   <button id="gear" class="icon-btn" aria-label="Pass settings" title="PASS SETTINGS: choose which passes count. Saved in this browser.">
     <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
   </button>
-  <button id="units" class="icon-btn units" title="UNITS: switch between miles and kilometres.">mi</button>
+  <button id="units" class="icon-btn units" title="UNITS: switch between miles and kilometers.">mi</button>
   <button id="fullscreen-toggle" class="icon-btn" aria-label="Full screen" title="FULL SCREEN: show the map on its own.">
     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>
   </button>
@@ -88,8 +88,8 @@
 
 <footer class="foot">
   <p>New to this? Read the <a href="/guide">guide</a>: how to see the station, and what everything on this page means.</p>
-  <p>Your location is rounded to about a kilometre before it leaves this browser, is used only to predict passes and fetch the sky forecast, and is not stored on the server. Places and settings are remembered in this browser only.</p>
-  <p>Map styling inspired by the <a href="https://isstracker.spaceflight.esa.int/" rel="noopener">ESA ISS Tracker</a> · orbits by <a href="https://github.com/brandon-rhodes/python-sgp4" rel="noopener">sgp4</a> · orbital elements from <a href="https://celestrak.org/" rel="noopener">Celestrak</a> · Moon by <a href="https://github.com/cosinekitty/astronomy" rel="noopener">astronomy.browser.js</a> · places and sky forecast by <a href="https://open-meteo.com/" rel="noopener">Open-Meteo</a> · also a <a href="https://github.com/mattbratt/iss_track" rel="noopener">Home Assistant integration</a> · <a href="https://github.com/mattbratt/iss_track_web" rel="noopener">source</a></p>
+  <p>Made by <a href="https://github.com/mattbratt" rel="noopener">Matthew Baker</a> · orbits by <a href="https://github.com/brandon-rhodes/python-sgp4" rel="noopener">sgp4</a> · orbital elements from <a href="https://celestrak.org/" rel="noopener">Celestrak</a> · Moon by <a href="https://github.com/cosinekitty/astronomy" rel="noopener">astronomy.browser.js</a> · places and sky forecast by <a href="https://open-meteo.com/" rel="noopener">Open-Meteo</a> · map styling inspired by the <a href="https://isstracker.spaceflight.esa.int/" rel="noopener">ESA ISS Tracker</a></p>
+  <p><a href="/privacy">Privacy</a> · <a href="https://github.com/mattbratt/iss_track" rel="noopener">Home Assistant integration</a> · <a href="https://github.com/mattbratt/iss_track_web" rel="noopener">Source</a></p>
 </footer>
 
 <div id="waitmsg">Loading ISS Track…</div>
@@ -98,7 +98,7 @@
   <div class="modal-content">
     <span class="close" role="button" aria-label="Close">×</span>
     <iframe
-      src="https://www.youtube.com/embed/awQzjn72bI0?si=NuMb4gYmPAp0D0kP"
+      data-src="https://www.youtube.com/embed/awQzjn72bI0?si=NuMb4gYmPAp0D0kP"
       title="YouTube video player"
       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
       referrerpolicy="strict-origin-when-cross-origin"
@@ -118,7 +118,7 @@
       <span>Use my location</span>
       <span class="where-hint">rounded to about 1 km</span>
     </button>
-    <p id="where-status" class="ps-note">Your position is rounded to about a kilometre before it leaves this browser, and nothing is stored on the server.</p>
+    <p id="where-status" class="ps-note"></p>
     <p class="ps-h">Or a place</p>
     <div class="where-search">
       <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
@@ -127,7 +127,7 @@
     <div id="where-results" class="where-list"></div>
     <p class="ps-h" id="where-recent-title" hidden>Recent</p>
     <div id="where-recent" class="where-list"></div>
-    <p class="ps-note where-foot">Places are remembered in this browser only. Pass times are shown in the place's own time zone.</p>
+    <p class="ps-note where-foot">Pass times are shown in the place's own time zone. <a href="/privacy#location">How your location is used</a></p>
   </div>
 </div>
 

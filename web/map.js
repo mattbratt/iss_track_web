@@ -34,7 +34,7 @@ export function setOverlay(value) {
   if (isInitialized) drawEverything();
 }
 
-// Miles or kilometres, decided by the page.
+// Miles or kilometers, decided by the page.
 export function setUnits(metric) {
   useMetric = Boolean(metric);
   if (isInitialized) drawEverything();
@@ -271,12 +271,12 @@ function drawOverlay(altKm) {
     const points = orbitPoints(pass.start, pass.end, 10000);
     if (points.length > 1) drawOrbitSegments(splitDateLine(points), 'rgb(93, 202, 165)', 5);
   }
-  // Up for this observer but not visible: dashed and grey, never green.
+  // Up for this observer but not visible: dashed and gray, never green.
   const unseen = overlay.unseen;
   if (unseen) {
     const points = orbitPoints(unseen.start, unseen.end, 10000);
     if (points.length > 1) {
-      // A dark bed first, so the dashes read as grey and not as gaps in
+      // A dark bed first, so the dashes read as gray and not as gaps in
       // the yellow track underneath.
       const segments = splitDateLine(points);
       drawOrbitSegments(segments, 'rgb(40, 44, 60)', 5);
@@ -551,16 +551,17 @@ function drawInitialISS(lat, lon) {
   drawISS(lat, lon);
 }
 
+// The player is fetched from YouTube only when someone opens the video, and
+// dropped again on close: until then the page asks YouTube for nothing, which
+// is what the privacy page promises.
 function openModal() {
   videoModal.style.display = 'flex';
-  const src = modalIframe.src;
-  modalIframe.src = '';
-  modalIframe.src = src + '&autoplay=1';
+  modalIframe.src = modalIframe.dataset.src + '&autoplay=1';
 }
 
 function closeModal() {
   videoModal.style.display = 'none';
-  modalIframe.src = modalIframe.src.replace('&autoplay=1', '');
+  modalIframe.src = 'about:blank';
 }
 
 window.onclick = function(event) {

@@ -631,6 +631,7 @@ a.icon-btn { text-decoration: none; }
 }
 .where-foot { margin: 14px 0 0; }
 #where-status.bad { color: var(--iss-warn); }
+#where-status:empty { display: none; }
 
 /* ----- footer ----- */
 .foot {

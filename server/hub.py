@@ -72,7 +72,7 @@ def milliseconds(when: datetime) -> int:
 
 
 def observer_key(observer: engine.Observer) -> tuple[float, float]:
-    """Two decimals, about a kilometre: the integration's own rounding."""
+    """Two decimals, about a kilometer: the integration's own rounding."""
     return (round(observer.latitude, 2), round(observer.longitude, 2))
 
 
@@ -429,7 +429,8 @@ class Hub:
             times = payload["hourly"]["time"]
             covers = payload["hourly"]["cloud_cover"]
         except (httpx.HTTPError, ValueError, KeyError, TypeError) as err:
-            _LOGGER.warning("No sky forecast for %.2f, %.2f: %s", latitude, longitude, err)
+            # No position in the log: the privacy page says the server keeps none.
+            _LOGGER.warning("No sky forecast for a place: %s", err)
             return None
         rows: list[tuple[datetime, str]] = []
         for stamp, cover in zip(times, covers):

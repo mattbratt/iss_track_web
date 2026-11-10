@@ -108,7 +108,7 @@ def event_lines(
     summary = f"ISS pass: {quality}, {peak}°, magnitude {format_magnitude(item['magnitude'])}"
     description = (
         f"Visible for {format_duration(item['duration_seconds'])}. {describe_path(item)}. "
-        f"Highest point {peak}° above the horizon, towards the {item['peak_direction']}. "
+        f"Highest point {peak}° above the horizon, toward the {item['peak_direction']}. "
         f"Sky forecast when this was fetched: {SKY_LABEL.get(item.get('sky', 'unknown'), 'no forecast yet')}."
     )
     if site:

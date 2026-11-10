@@ -9,9 +9,9 @@ See the [changelog](CHANGELOG.md) for what is new in each version.
 ## What it shows
 
 - The station's position on a world map with day and night shading and its orbit paths, 1.5 hours ahead and behind.
-- Latitude, longitude, altitude, speed and ISS time, in miles or kilometres.
+- Latitude, longitude, altitude, speed and ISS time, in miles or kilometers.
 - Every pass you can see in the next 10 days from the place you are watching from, with the next matching pass drawn in green on the map and a blue ring showing where the station has to be for you to see it.
-- A note when the station is about to cross your sky with nothing to see, and why: it is in Earth's shadow, or your sky is too bright. That stretch of track is drawn dashed and grey.
+- A note when the station is about to cross your sky with nothing to see, and why: it is in Earth's shadow, or your sky is too bright. That stretch of track is drawn dashed and gray.
 - A sky forecast for each pass, from Open-Meteo's hourly cloud cover at your place.
 - Your matching passes in your own calendar, as a downloaded file or a feed that updates itself, so it reminds you before each one.
 - A guide that explains all of it in plain language.
@@ -19,10 +19,15 @@ See the [changelog](CHANGELOG.md) for what is new in each version.
 
 ## Where you are watching from
 
-- **Use my location** asks your browser for its position once. The position is rounded to about a kilometre before it leaves your browser, is used only to predict passes and fetch the sky forecast, and is not stored on the server.
+- **Use my location** asks your browser for its position once, and works with it rounded to about a kilometer.
 - **A place** finds a town or city by name. Pass times are shown in that place's own time zone.
-- Up to five recent places are remembered in your browser. The site itself keeps nothing else about you.
-- The public site at `iss.whereisitin.space` counts visits and page load times with Cloudflare Web Analytics, which Cloudflare says uses no cookies and does not follow people across websites. A copy you host yourself measures nothing unless you turn the same thing on.
+- Up to five recent places are offered again the next time you choose one.
+
+## Privacy
+
+The site has a privacy policy at `/privacy`, linked from the bottom of every page. It says what happens to a visitor's location, what the browser remembers, what a calendar address reveals, how visits are counted, and which other services are involved. Nothing about any of that is stated anywhere else, so there is one place to keep true.
+
+The policy describes the public site at `iss.whereisitin.space`. If you host a copy, it is yours to keep accurate: the page is `web/privacy/index.html`. The container runs without a request log, so the server keeps no record of requests.
 
 ## Reminders
 
@@ -37,7 +42,7 @@ The file and the feed carry the place and the settings you had when you made the
 
 ## The guide
 
-The question mark in the top bar opens a plain-language guide at `/guide`: what the map shows, why passes happen at dusk and dawn, a gentle chapter on orbits, how to read a pass, the settings, privacy, and what to do when you step outside.
+The question mark in the top bar opens a plain-language guide at `/guide`: what the map shows, why passes happen at dusk and dawn, a gentle chapter on orbits, how to read a pass, the settings, and what to do when you step outside.
 
 ## Pass settings
 
@@ -81,7 +86,7 @@ This is how the public site is hosted. A Cloudflare Tunnel gives the site HTTPS 
 
 To update to a newer version later, select the project in Container Manager, click **Stop**, then **Action, Build**. The compose file's `pull_policy: always` makes that fetch the newest image; without that line the NAS keeps reusing the image it already has.
 
-Cloudflare's Web Analytics is optional and works as is. If it is on for the domain, Cloudflare adds its script to each page, and the site's content security policy allows that one script and the address it reports to. If you use it, say so to your visitors; the guide's wording names the public site only.
+Cloudflare's Web Analytics is optional and works as is. If it is on for the domain, Cloudflare adds its script to each page, and the site's content security policy allows that one script and the address it reports to. If you use it, say so to your visitors: the privacy page describes the public site, so edit it for yours.
 
 Without a domain, DSM's own reverse proxy with a Let's Encrypt certificate on a `synology.me` name works too, but that means opening port 443 on your router and the site runs at your home IP address.
 
@@ -125,11 +130,12 @@ pytest vendor/iss_track/tests
 To move to a newer engine, check out the new tag inside `vendor/iss_track` and commit the submodule change.
 
 ## Credits
-- Map styling inspired by the European Space Agency's [ESA ISS Tracker](https://isstracker.spaceflight.esa.int/). Everything else is its own implementation.
+- Made by [Matthew Baker](https://github.com/mattbratt).
 - Uses [`sgp4`](https://github.com/brandon-rhodes/python-sgp4) for orbital calculations.
 - Uses [`astronomy.browser.js`](https://github.com/cosinekitty/astronomy) for moon position calculations.
 - Orbital elements courtesy of [Celestrak](https://celestrak.org/).
 - Place search and sky forecasts from [Open-Meteo](https://open-meteo.com/).
+- Map styling inspired by the European Space Agency's [ESA ISS Tracker](https://isstracker.spaceflight.esa.int/). Everything else is its own implementation.
 
 ## License
 MIT License

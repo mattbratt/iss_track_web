@@ -201,7 +201,7 @@ function renderHead(state, now) {
   $('ps-summary').textContent = open ? '' : summary;
   let note = '';
   if (observer) {
-    const where = observer.kind === 'here' ? 'Your location, rounded to about a kilometre' : placeLabel(observer);
+    const where = observer.kind === 'here' ? 'Your location, rounded to about a kilometer' : placeLabel(observer);
     note = `${where} · times in ${observer.timezone}`;
   }
   $('ps-note').textContent = note;
@@ -467,7 +467,7 @@ function chooseObserver(who) {
 }
 
 function openWhere() {
-  setWhereStatus('Your position is rounded to about a kilometre before it leaves this browser, and nothing is stored on the server.');
+  setWhereStatus('');
   $('where-input').value = '';
   results = [];
   renderResults('');
@@ -826,8 +826,8 @@ function closeRemind() {
 function applyUnits() {
   $('units').textContent = metric ? 'km' : 'mi';
   $('units').title = metric
-    ? 'UNITS: showing kilometres. Click for miles.'
-    : 'UNITS: showing miles. Click for kilometres.';
+    ? 'UNITS: showing kilometers. Click for miles.'
+    : 'UNITS: showing miles. Click for kilometers.';
   map.setUnits(metric);
 }
 

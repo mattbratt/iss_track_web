@@ -1,9 +1,14 @@
 """The HTTP surface: shapes, refusals, headers and the static files."""
 from __future__ import annotations
 
+import re
+from pathlib import Path
+
 from conftest import NOW
 from server.hub import milliseconds
 from server.main import KEEP_A_DAY, REVALIDATE, cache_policy
+
+ROOT = Path(__file__).resolve().parent.parent
 
 
 def test_health_and_track(client):
@@ -194,8 +199,80 @@ def test_the_security_policy_names_every_outside_address(client):
     assert client.get("/api/health").headers["content-security-policy"] == client.get("/").headers["content-security-policy"]
 
 
-def test_the_guide_says_who_counts_visits(client):
-    guide = client.get("/guide/").text
-    assert "Cloudflare, which counts visits" in guide
-    assert "uses no cookies" in guide
-    assert "Nothing is remembered anywhere else" not in guide
+def test_the_privacy_page_is_served_and_says_what_is_true(client):
+    page = client.get("/privacy/")
+    assert page.status_code == 200
+    assert page.headers["cache-control"] == REVALIDATE
+    assert "<title>ISS Track privacy</title>" in page.text
+    for chapter in ("short", "location", "browser", "reminders", "visits", "services", "server", "questions"):
+        assert f'<h2 id="{chapter}">' in page.text, chapter
+    # The claims the rest of the code has to keep true.
+    assert "rounded to about a kilometer" in page.text
+    assert "It keeps no log of requests." in page.text
+    assert "Nothing is loaded from YouTube until you open the video." in page.text
+    assert "Cloudflare says this uses no cookies" in page.text
+    # Without the slash it leads to the page.
+    assert client.get("/privacy", follow_redirects=False).status_code in (301, 307, 308)
+    assert client.get("/privacy").status_code == 200
+
+
+def test_the_code_keeps_the_privacy_pages_promises():
+    # "It keeps no log of requests": the container runs without one, and no
+    # log line carries a position.
+    assert '"--no-access-log"' in (ROOT / "Dockerfile").read_text(encoding="utf-8")
+    hub = (ROOT / "server" / "hub.py").read_text(encoding="utf-8")
+    assert "latitude, longitude, err)" not in hub
+    # "Nothing is loaded from YouTube until you open the video": the frame
+    # has no address of its own until the page's code gives it one.
+    index = (ROOT / "web" / "index.html").read_text(encoding="utf-8")
+    assert 'data-src="https://www.youtube.com/embed/' in index
+    assert '\n      src="https://www.youtube.com' not in index
+    assert "modalIframe.dataset.src" in (ROOT / "web" / "map.js").read_text(encoding="utf-8")
+
+
+def test_the_footer_credits_the_author_first_and_esa_last(client):
+    page = client.get("/").text
+    foot = page[page.index('<footer class="foot">'):page.index("</footer>")]
+    order = [foot.index(name) for name in (
+        "Matthew Baker", ">sgp4<", ">Celestrak<", ">astronomy.browser.js<", ">Open-Meteo<", ">ESA ISS Tracker<",
+    )]
+    assert order == sorted(order)
+    assert 'href="https://github.com/mattbratt"' in foot
+    assert '<a href="/privacy">Privacy</a>' in foot
+    # The ESA credit closes the credits line.
+    assert '>ESA ISS Tracker</a></p>' in foot
+
+    credits = client.get("/guide/").text
+    credits = credits[credits.index('<h2 id="credits">'):]
+    assert credits.index("Matthew Baker") < credits.index("sgp4") < credits.index("ESA ISS Tracker")
+    assert credits.index("ESA ISS Tracker") > credits.index("Open-Meteo")
+
+
+def test_what_is_kept_is_said_on_the_privacy_page_only(client):
+    # One place to keep true. The pages link to it instead of restating it.
+    for path in ("/", "/guide/"):
+        text = client.get(path).text
+        for phrase in ("stored on the server", "remembered in this browser", "remembered in your browser",
+                       "stores nothing about you", "Cloudflare", "cookies"):
+            assert phrase not in text, (path, phrase)
+        assert 'href="/privacy' in text, path
+    assert "nothing is stored on the server" not in client.get("/app.js").text
+
+
+def test_us_spelling_on_the_pages_and_in_the_code():
+    british = re.compile(
+        r"\b(?:kilo|centi|milli)?metres?\b|\bgrey\b|\bneighbours?\b|\btravell(?:ing|ed|ers?)\b|\btowards\b"
+        r"|\bcolours?\b|\bcentred?\b|\bfavour\w*|\bprogramme\b|\blicence\b|\bcatalogue\b|\banalyse\w*",
+        re.IGNORECASE,
+    )
+    files = [ROOT / "README.md", ROOT / "Dockerfile", ROOT / "docker-compose.yml"]
+    for folder, patterns in (("web", ("*.html", "*.js", "*.css")), ("server", ("*.py",))):
+        for pattern in patterns:
+            files += sorted((ROOT / folder).rglob(pattern))
+    assert len(files) > 12
+    found = []
+    for file in files:
+        for number, line in enumerate(file.read_text(encoding="utf-8").splitlines(), 1):
+            for word in british.findall(line):
+                found.append(f"{file.relative_to(ROOT)}:{number} {word}")
+    assert found == []
