@@ -5,6 +5,10 @@
 services:
   iss_track_web:
     image: ghcr.io/mattbratt/iss_track_web:latest
+    # Fetch the newest image on every start. Without this a host that already
+    # holds "latest" keeps reusing it, and Synology's Container Manager never
+    # checks this registry for a newer one.
+    pull_policy: always
     container_name: iss_track_web
     restart: unless-stopped
     environment:

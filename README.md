@@ -78,6 +78,8 @@ This is how the public site is hosted. A Cloudflare Tunnel gives the site HTTPS 
 5. Back on the tunnel's page, add a route of type **Published application**, with the subdomain and domain you want, for example `iss.example.com`, and the service URL `http://iss_track_web:8000`. The site is up at that hostname straight away. On your own network it is also at `http://<nas-address>:8765`.
 6. Under the domain's **SSL/TLS, Edge Certificates**, turn on **Always Use HTTPS**, so a visitor who types the bare hostname lands on the secure page, where the location button works.
 
+To update to a newer version later, select the project in Container Manager, click **Stop**, then **Action, Build**. The compose file's `pull_policy: always` makes that fetch the newest image; without that line the NAS keeps reusing the image it already has.
+
 Without a domain, DSM's own reverse proxy with a Let's Encrypt certificate on a `synology.me` name works too, but that means opening port 443 on your router and the site runs at your home IP address.
 
 ### On any Docker host
