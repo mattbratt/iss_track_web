@@ -2,6 +2,11 @@
 
 All notable changes to ISS Track (web) are listed here, newest first.
 
+## 1.3.1 - 2026-11-10
+
+### Fixed
+- **The guide and the privacy page open in one step.** Their links had no closing slash, so every click was redirected, and behind a tunnel the redirect pointed at plain `http`, which the proxy then sent back to `https`: two hops for one page. The links now name the folders directly, and a redirect back to the site itself is sent as a bare path, so a typed `/guide` or `/privacy` takes one hop and stays on `https`.
+
 ## 1.3.0 - 2026-11-10
 
 ### Fixed

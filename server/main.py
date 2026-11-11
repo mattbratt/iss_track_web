@@ -11,6 +11,7 @@ import os
 from datetime import datetime, timezone
 from contextlib import asynccontextmanager
 from pathlib import Path
+from urllib.parse import urlsplit
 
 import httpx
 from fastapi import FastAPI, HTTPException, Query, Request
@@ -128,11 +129,35 @@ async def lifespan(app: FastAPI):
 app = FastAPI(title="ISS Track (web)", lifespan=lifespan, docs_url=None, redoc_url=None, openapi_url=None)
 
 
+def same_site_path(location: str, request: Request) -> str | None:
+    """A redirect address as a bare path, when it points back at this site.
+
+    "/guide" is sent on to "/guide/" with the full address the service sees,
+    and behind a tunnel that is plain http. A visitor on https was then sent
+    to http and bounced back by the proxy: two hops for one. A path alone
+    keeps whatever scheme and host the visitor is already on.
+    """
+    parts = urlsplit(location)
+    if not parts.scheme or not parts.netloc:
+        return None
+    host = request.headers.get("host") or request.url.netloc
+    if parts.netloc.lower() != host.lower():
+        return None
+    path = parts.path or "/"
+    if path.startswith("//"):
+        return None  # would read as another host
+    return path + (f"?{parts.query}" if parts.query else "")
+
+
 @app.middleware("http")
 async def security_headers(request: Request, call_next):
     response = await call_next(request)
     for name, value in SECURITY_HEADERS.items():
         response.headers.setdefault(name, value)
+    if 300 <= response.status_code < 400 and "location" in response.headers:
+        path = same_site_path(response.headers["location"], request)
+        if path:
+            response.headers["location"] = path
     if "cache-control" not in response.headers:
         policy = cache_policy(request.url.path, response.status_code)
         if policy:

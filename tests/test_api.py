@@ -9,7 +9,7 @@ import pytest
 
 from conftest import HD_STREAM, NOW, YOUTUBE_KEY
 from server.hub import milliseconds
-from server.main import KEEP_A_DAY, REVALIDATE, cache_policy
+from server.main import KEEP_A_DAY, REVALIDATE, cache_policy, same_site_path
 
 ROOT = Path(__file__).resolve().parent.parent
 
@@ -295,7 +295,7 @@ def test_the_footer_credits_the_author_first_and_esa_last(client):
     )]
     assert order == sorted(order)
     assert 'href="https://github.com/mattbratt"' in foot
-    assert '<a href="/privacy">Privacy</a>' in foot
+    assert '<a href="/privacy/">Privacy</a>' in foot
     # The ESA credit closes the credits line.
     assert '>ESA ISS Tracker</a></p>' in foot
 
@@ -333,3 +333,40 @@ def test_us_spelling_on_the_pages_and_in_the_code():
             for word in british.findall(line):
                 found.append(f"{file.relative_to(ROOT)}:{number} {word}")
     assert found == []
+
+
+def test_a_folder_without_its_slash_is_one_hop_away(client):
+    # The service sees plain http behind the tunnel. A full address in the
+    # redirect sent an https visitor to http and back: two hops. A bare path
+    # keeps the visitor's own scheme and host.
+    for path in ("/guide", "/privacy"):
+        for host in ("testserver", "iss.example.com"):
+            response = client.get(path, headers={"host": host}, follow_redirects=False)
+            assert response.status_code in (301, 307, 308)
+            assert response.headers["location"] == path + "/", (path, host)
+    assert client.get("/guide?from=mail", follow_redirects=False).headers["location"] == "/guide/?from=mail"
+
+
+def test_only_a_redirect_back_to_this_site_is_shortened():
+    from starlette.requests import Request
+
+    request = Request({
+        "type": "http", "method": "GET", "path": "/", "query_string": b"", "scheme": "http",
+        "server": ("10.0.0.5", 8000), "headers": [(b"host", b"iss.example.com")],
+    })
+    assert same_site_path("http://iss.example.com/guide/", request) == "/guide/"
+    assert same_site_path("http://ISS.example.com", request) == "/"
+    assert same_site_path("https://iss.example.com/a?b=1", request) == "/a?b=1"
+    # Somewhere else, already a path, or a path that would read as a host: left alone.
+    assert same_site_path("https://www.youtube.com/watch", request) is None
+    assert same_site_path("http://iss.example.com.evil.test/guide/", request) is None
+    assert same_site_path("/guide/", request) is None
+    assert same_site_path("http://iss.example.com//evil.test/", request) is None
+
+
+def test_the_pages_link_straight_to_the_guide_and_privacy_folders(client):
+    # A link without the slash costs every click a redirect.
+    for path in ("/", "/guide/", "/privacy/"):
+        text = client.get(path).text
+        assert re.findall(r'href="/(?:guide|privacy)(?:"|#)', text) == [], path
+    assert 'href="/privacy/#location"' in client.get("/").text
