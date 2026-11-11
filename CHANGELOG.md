@@ -2,6 +2,18 @@
 
 All notable changes to ISS Track (web) are listed here, newest first.
 
+## 1.3.0 - 2026-11-10
+
+### Fixed
+- **The live video plays again.** NASA ended the stream the page pointed at on October 22 and started a new one under a new address, so clicking the station showed "Video unavailable". The site now shows the current stream.
+
+### Added
+- **The site follows NASA's stream by itself.** NASA restarts its stream every few months and nothing announces it. With a YouTube Data API key in `YOUTUBE_API_KEY`, the server asks YouTube about once an hour which of NASA's streams is live and the page shows that one. A failed lookup keeps the last stream found. Without a key the stream built into the version is shown, as before. The README says how to get a key; it is free.
+- **A notice when there is no stream.** Between NASA's streams the video window says "No live video right now" and links to NASA's channel, in place of YouTube's error screen.
+
+### Changed
+- The page no longer carries a video address. It asks the site (`/api/video`) when the station is clicked, and still asks YouTube for nothing until then. The address it opens no longer has YouTube's share-tracking tag on it.
+
 ## 1.2.4 - 2026-11-10
 
 ### Added

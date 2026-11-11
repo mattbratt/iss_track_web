@@ -54,6 +54,7 @@ const fullscreenToggle = document.getElementById('fullscreen-toggle');
 const tooltip = document.getElementById('iss-tooltip');
 const videoModal = document.getElementById('videoModal');
 const modalIframe = videoModal.querySelector('iframe');
+const videoNotice = document.getElementById('videoNotice');
 const closeButton = document.querySelector('.close');
 const latEl = document.getElementById('lat');
 const lonEl = document.getElementById('lon');
@@ -554,12 +555,40 @@ function drawInitialISS(lat, lon) {
 // The player is fetched from YouTube only when someone opens the video, and
 // dropped again on close: until then the page asks YouTube for nothing, which
 // is what the privacy page promises.
-function openModal() {
+//
+// NASA gives each new stream a new address and the old one stops for good,
+// so the page carries none: it asks the site which stream is live now. An
+// answer with no id, or no answer, shows the notice instead of the player.
+let modalOpen = false;
+
+async function liveVideoId() {
+  try {
+    const response = await fetch('/api/video');
+    if (!response.ok) return null;
+    const id = (await response.json()).id;
+    return typeof id === 'string' && /^[A-Za-z0-9_-]{11}$/.test(id) ? id : null;
+  } catch (err) {
+    return null;
+  }
+}
+
+async function openModal() {
+  modalOpen = true;
+  videoNotice.hidden = true;
+  modalIframe.hidden = false;
   videoModal.style.display = 'flex';
-  modalIframe.src = modalIframe.dataset.src + '&autoplay=1';
+  const id = await liveVideoId();
+  if (!modalOpen) return; // closed while the answer was on its way
+  if (id) {
+    modalIframe.src = `https://www.youtube.com/embed/${id}?autoplay=1`;
+  } else {
+    modalIframe.hidden = true;
+    videoNotice.hidden = false;
+  }
 }
 
 function closeModal() {
+  modalOpen = false;
   videoModal.style.display = 'none';
   modalIframe.src = 'about:blank';
 }

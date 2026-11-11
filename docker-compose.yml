@@ -14,6 +14,10 @@ services:
     environment:
       # Behind the tunnel, request limits apply per visitor, not per tunnel.
       ISS_TRACK_TRUST_PROXY: "1"
+      # Optional: a YouTube Data API key from .env. With it the site finds
+      # NASA's current live stream every hour; without it, it shows the one
+      # built into this version.
+      YOUTUBE_API_KEY: ${YOUTUBE_API_KEY:-}
     volumes:
       # The last good orbital elements, kept across restarts. Create the
       # data folder before the first start: Synology's Docker does not make

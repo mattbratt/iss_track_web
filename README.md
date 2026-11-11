@@ -110,11 +110,27 @@ python -m venv .venv
 
 Then open `http://localhost:8765`. Browser geolocation works on `localhost` without HTTPS.
 
+### The live video
+
+Clicking the station opens NASA's live view from it, on YouTube. NASA restarts that stream every few months, each restart gets a new address, and the old address then says "Video unavailable" for good. Nothing announces the change.
+
+Each version of the site has the current stream built in, which works until NASA's next restart. To have the site follow restarts by itself, give it a YouTube Data API key. With a key the server asks YouTube about once an hour which of NASA's streams is live, shows that one, and shows a short "No live video right now" notice when none is. The key is free and needs no billing account. A key is given 100 searches a day and the site uses 24.
+
+1. Open [console.cloud.google.com](https://console.cloud.google.com), sign in, and create a project.
+2. Under **APIs & Services, Library**, find **YouTube Data API v3** and click **Enable**.
+3. Under **APIs & Services, Credentials**, click **Create credentials**, then **API key**.
+4. Restrict the key: under **API restrictions** choose **Restrict key** and tick **YouTube Data API v3** only.
+5. Put the key in `.env` beside the compose file as `YOUTUBE_API_KEY=your-key`. It is a secret, like the tunnel token. The compose file in this repository passes it to the site; one copied from an older version needs the `YOUTUBE_API_KEY` line under `environment` added by hand.
+6. Start the project again. `/api/video` on your site then answers with `"source": "lookup"`.
+
+If the lookup fails (a wrong key, the allowance used up, YouTube unreachable) the site keeps showing the last stream it found and tries again an hour later. The key is sent only to Google and is never written to the log.
+
 ### Settings
 
 | Variable | Default | What it does |
 |---|---|---|
-| `ISS_TRACK_DATA_DIR` | `./data` | Where the cached orbital elements are kept |
+| `YOUTUBE_API_KEY` | none | A YouTube Data API v3 key, so the site finds NASA's current live stream every hour. Without it the stream built into the version is shown |
+| `ISS_TRACK_DATA_DIR` | `./data` | Where the cached orbital elements and the last live stream found are kept |
 | `ISS_TRACK_TRUST_PROXY` | `0` | Set to `1` behind a tunnel or reverse proxy, so request limits apply per visitor rather than per proxy |
 
 ## Development

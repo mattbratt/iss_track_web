@@ -98,12 +98,20 @@
   <div class="modal-content">
     <span class="close" role="button" aria-label="Close">×</span>
     <iframe
-      data-src="https://www.youtube.com/embed/awQzjn72bI0?si=NuMb4gYmPAp0D0kP"
       title="YouTube video player"
       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
       referrerpolicy="strict-origin-when-cross-origin"
       allowfullscreen>
     </iframe>
+    <div id="videoNotice" class="video-notice" hidden>
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3l18 18M15 11v-1l4.553-2.276A1 1 0 0 1 21 8.618v6.764a1 1 0 0 1-.675.946M10 6h3a2 2 0 0 1 2 2v3m0 4v1a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h1"/></svg>
+      <p class="video-notice-title">No live video right now</p>
+      <p>NASA's stream from the station is offline. Check back later, or look for it on NASA's channel.</p>
+      <a href="https://www.youtube.com/@NASA/streams" class="chip" target="_blank" rel="noopener" title="NASA ON YOUTUBE: opens NASA's live streams in a new tab.">
+        <span>NASA on YouTube</span>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 6H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6M11 13l9-9M15 4h5v5"/></svg>
+      </a>
+    </div>
   </div>
 </div>
 

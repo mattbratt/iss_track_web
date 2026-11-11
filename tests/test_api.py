@@ -5,7 +5,9 @@ import math
 import re
 from pathlib import Path
 
-from conftest import NOW
+import pytest
+
+from conftest import HD_STREAM, NOW, YOUTUBE_KEY
 from server.hub import milliseconds
 from server.main import KEEP_A_DAY, REVALIDATE, cache_policy
 
@@ -234,10 +236,55 @@ def test_the_code_keeps_the_privacy_pages_promises():
     assert farthest_km * 0.6214 < 0.5
     # "Nothing is loaded from YouTube until you open the video": the frame
     # has no address of its own until the page's code gives it one.
+    # The page itself names no video at all: it asks the site which stream
+    # is live, and only opening the video points the frame at YouTube.
     index = (ROOT / "web" / "index.html").read_text(encoding="utf-8")
-    assert 'data-src="https://www.youtube.com/embed/' in index
-    assert '\n      src="https://www.youtube.com' not in index
-    assert "modalIframe.dataset.src" in (ROOT / "web" / "map.js").read_text(encoding="utf-8")
+    frame = index[index.index("<iframe"):index.index("</iframe>")]
+    assert "src=" not in frame
+    assert "youtube.com/embed" not in index
+    script = (ROOT / "web" / "map.js").read_text(encoding="utf-8")
+    assert script.count("youtube.com/embed/") == 1
+    opener = script[script.index("async function openModal()"):script.index("function closeModal()")]
+    assert "youtube.com/embed/" in opener
+    assert "fetch('/api/video')" in script
+    assert "modalIframe.src = 'about:blank';" in script
+
+
+def test_the_live_video_without_a_key_is_the_built_in_stream(client, internet):
+    response = client.get("/api/video")
+    assert response.status_code == 200
+    assert response.headers["cache-control"] == "public, max-age=300"
+    assert response.json() == {
+        "id": "ROboUHfPUrU",
+        "source": "built_in",
+        "checked_at": None,
+        "channel": "https://www.youtube.com/@NASA/streams",
+    }
+    assert "www.googleapis.com" not in internet.calls
+
+
+@pytest.mark.parametrize("youtube_key", [YOUTUBE_KEY])
+def test_the_live_video_with_a_key_is_the_one_youtube_names(client, internet):
+    body = client.get("/api/video").json()
+    assert body["id"] == HD_STREAM[0]
+    assert body["source"] == "lookup"
+    assert body["checked_at"] == milliseconds(NOW)
+    assert internet.youtube_calls == ["search"]
+    # The key never reaches a visitor.
+    assert YOUTUBE_KEY not in client.get("/api/video").text
+    assert YOUTUBE_KEY not in client.get("/api/health").text
+
+
+def test_the_no_video_notice_is_on_the_page_and_stays_hidden_until_needed(client):
+    page = client.get("/").text
+    notice = page[page.index('<div id="videoNotice"'):]
+    notice = notice[:notice.index("</div>")]
+    assert notice.startswith('<div id="videoNotice" class="video-notice" hidden>')
+    assert "No live video right now" in notice
+    assert 'href="https://www.youtube.com/@NASA/streams"' in notice
+    assert 'rel="noopener"' in notice
+    # A flex box would ignore the hidden attribute without this rule.
+    assert ".video-notice[hidden]" in client.get("/site.css").text
 
 
 def test_the_footer_credits_the_author_first_and_esa_last(client):

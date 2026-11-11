@@ -28,9 +28,11 @@ from .hub import (
 )
 from .limits import RequestLimiter
 from .vendor import WEB, WWW, engine
+from .video import LiveVideo
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
 # httpx logs every outbound request at INFO; the hub already logs the failures.
+# It must stay quiet: the live video lookup's address carries the API key.
 logging.getLogger("httpx").setLevel(logging.WARNING)
 
 USER_AGENT = "iss-track-web (https://github.com/mattbratt/iss_track_web)"
@@ -100,17 +102,25 @@ def make_hub(http: httpx.AsyncClient) -> Hub:
     return Hub(data_dir(), http)
 
 
+def make_video(http: httpx.AsyncClient) -> LiveVideo:
+    return LiveVideo(data_dir(), http, api_key=os.environ.get("YOUTUBE_API_KEY"))
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     http = make_http()
     hub = make_hub(http)
+    video = make_video(http)
     app.state.hub = hub
+    app.state.video = video
     app.state.limiter = RequestLimiter()
     app.state.trust_proxy = trust_proxy()
     await hub.start()
+    await video.start()
     try:
         yield
     finally:
+        await video.stop()
         await hub.stop()
         await http.aclose()
 
@@ -256,6 +266,15 @@ async def places(request: Request, q: str = Query(min_length=2, max_length=80)):
     limited(request)
     hub: Hub = request.app.state.hub
     return {"places": await hub.places(q)}
+
+
+@app.get("/api/video")
+async def video(request: Request):
+    """The live video to show when someone clicks the station: its YouTube
+    id, or None when NASA has no stream up. The page asks here, not YouTube,
+    so nothing reaches YouTube until the player itself is opened."""
+    live: LiveVideo = request.app.state.video
+    return JSONResponse(live.info(), headers={"Cache-Control": "public, max-age=300"})
 
 
 @app.api_route("/favicon.ico", methods=["GET", "HEAD"], include_in_schema=False)

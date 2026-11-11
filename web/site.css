@@ -262,6 +262,47 @@ a { color: var(--iss-text2); }
   color: #333;
 }
 .close:hover { color: #000; }
+/* Shown in the player's place when NASA has no stream up. With its top
+   margin it fills the player's height, so the window does not jump between
+   the two, and the dark panel starts below the close button: the button is
+   dark too, and would vanish against it. */
+.video-notice {
+  height: 297px;
+  margin-top: 18px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 0 28px;
+  text-align: center;
+  background: var(--iss-bg);
+  color: var(--iss-text2);
+  border-radius: 4px;
+}
+.video-notice[hidden], .modal-content iframe[hidden] { display: none; }
+.video-notice > svg {
+  width: 26px;
+  height: 26px;
+  fill: none;
+  stroke: var(--iss-text3);
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.video-notice p { margin: 0; max-width: 380px; font-size: 0.95rem; line-height: 1.5; }
+.video-notice .video-notice-title { color: var(--iss-text); font-size: 1.15rem; font-weight: 700; }
+.video-notice .chip {
+  margin-top: 8px;
+  max-width: none;
+  color: var(--iss-text);
+  text-decoration: none;
+  border: 1px solid var(--iss-border);
+  border-radius: 8px;
+}
+.video-notice .chip:hover { background: var(--iss-neutral-bg); }
+.video-notice .chip:focus-visible { outline: 2px solid var(--iss-info); outline-offset: 1px; }
+.video-notice .chip svg { width: 15px; height: 15px; color: var(--iss-text2); }
 
 /* ----- visible passes drawer ----- */
 #passes {
